@@ -1,8 +1,8 @@
 tnt_matrix <- function(pres_abs){
-#pres_abs = .txt file or an object which is the output from the node_terminal function
-  if(class(pres_abs)[1] == 'matrix' || class(pres_abs)[2] == 'array'){
+  # pres_abs = .txt file or an object which is the output from the node_terminal function
+  if(class(pres_abs)[1] == 'matrix'){
     mat <- pres_abs
-  } else {
+  } else if(class(pres_abs)[1] == 'character'){
     mat <- read.table(file = pres_abs, sep = '', dec = '.', row.names = 1) # presence-absence matrix
   }
 
