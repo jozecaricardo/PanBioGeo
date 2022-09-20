@@ -15,7 +15,7 @@ gridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, xmi
   xmin = xmin; xmax = xmax; ymin = ymin; ymax = ymax
   
   
-  grid <- raster(extent(shapeFile), resolution = resolut, crs = CRS("+proj=longlat +datum=WGS84"))
+  grid <- raster(extent(shape_file), resolution = resolut, crs = CRS("+proj=longlat +datum=WGS84"))
   grid <- raster::extend(grid, c(1, 1))
   gridPolygon <- rasterToPolygons(grid)
   # suppressWarnings(proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")) # datum WGS84
@@ -24,15 +24,15 @@ gridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, xmi
   
   
   # clipping the intersected cells:
-  cropped_map <- raster::intersect(gridPolygon, shapeFile)
+  cropped_map <- raster::intersect(gridPolygon, shape_file)
   # plot(cropped_map)
   # cropped_map <- vect(cropped_map, geom = c("x", "y"), crs = crs("+proj=longlat +datum=WGS84"))
   
   #########
-  # producing a raster of the shapefile
+  # producing a raster of the shape_file
   mask.raster <- raster(extent(gridPolygon), resolution = resolut,
                         crs = CRS("+proj=longlat +datum=WGS84"))
-  r <- rasterize(shapeFile, mask.raster)
+  r <- rasterize(shape_file, mask.raster)
   proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
   # mask.raster[is.na(mask.raster)] <- 0
   r <- merge(r, mask.raster)
@@ -40,13 +40,21 @@ gridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, xmi
   
   ncellR <- ncell(r)
   # 
-  # # set the cells associated with the shapefile to the specified value
+  # # set the cells associated with the shape_file to the specified value
   r[r > 0] <- NA
   
   # data frame com os grids escolhidos
   grid_n <- gridCell
+  # frameTemp <- read.table(file = 'out/pres_abs.txt', h = T, sep = '')
   frameTemp <- data.frame(spp = 'numEscolhido', grid_n = grid_n, row.names = 1:length(grid_n))
   # frameTemp
+  
+  # tabela com todas as células:
+  coor.l <- matrix(NA, nr = ncellras, nc = length(taxon), dimnames = list(seq(1:ncellras),
+                      taxon)[c(1:2)])  # tabela com todas as células
+  
+  
+  
   
   # matrix with species names and grid numbers:
   resulPaeRaster <- matrix(as.matrix(frameTemp[,2]), nrow(frameTemp),
@@ -57,6 +65,8 @@ gridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, xmi
     values(r)[gTrack] <- 1
   }
   # r[is.na(r)]<-0
+  
+  # r <- r[na.exclude(r)]
   
   #convert the raster to points for plotting the number of a grid
   map.r <- as.data.frame(rasterToPoints(r))
