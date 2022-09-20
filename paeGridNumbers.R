@@ -1,4 +1,5 @@
-gridNumbers <- function(shape_file, resol, coordina, gridCell){
+gridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, xmin = NULL,
+                        xmax = NULL, ymin = NULL, ymax = NULL){
   
   ######################
   ##### shape file #####
@@ -11,8 +12,7 @@ gridNumbers <- function(shape_file, resol, coordina, gridCell){
   cols1 <- setNames(n = viridis(length(unique(rownames(coordin)))),
                     unique(rownames(coordin)))
   
-  xmin = min(coordina$Long) - 5; xmax = max(coordina$Long); ymin = min(coordina$Lat) - 7
-  ymax = max(coordina$Lat) + 7 
+  xmin = xmin; xmax = xmax; ymin = ymin; ymax = ymax
   
   
   grid <- raster(extent(shapeFile), resolution = resolut, crs = CRS("+proj=longlat +datum=WGS84"))
@@ -76,12 +76,12 @@ gridNumbers <- function(shape_file, resol, coordina, gridCell){
   for(i in speciesN){
     contando <- contando + 1
     tempT <- subset(coordina, coordina$spp == i)
-    points(tempT[, c(2, 3)], pch = 16, col = adjustcolor(col = names(cols1[contando]), alpha = 0.8), cex = 1)
+    points(tempT[, c(2, 3)], pch = 16, col = adjustcolor(col = names(cols1[contando]), alpha = transp), cex = 1)
   }
   legend(x = "bottomleft", legend = speciesN, pch = 16, col = names(cols1[1:length(speciesN)]),
          title = 'Species',  title.col = 'red', pt.cex = 0.6, cex = 0.6)
   
-  plot(r, add = T, axes = F, legend = F, col = colores, alpha = 0.40, breaks = brks)
+  plot(r, add = T, axes = F, legend = F, col = colores, alpha = transp/2, breaks = brks)
   
   map.r$gridNumber <- which(pontosRaster@data@values == 1)
   
