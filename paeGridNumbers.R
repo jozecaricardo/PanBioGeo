@@ -88,5 +88,3 @@ gridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, xmi
   text(map.r[,c(1, 2)], labels = map.r$gridNumber, cex = (2 * resolut[1]) / resolut[1], col = 'black', font = 2)
   
 }
-
-
