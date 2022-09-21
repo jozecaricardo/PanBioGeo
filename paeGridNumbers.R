@@ -15,7 +15,7 @@ gridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, xmi
   xmin = xmin; xmax = xmax; ymin = ymin; ymax = ymax
   
   
-  grid <- raster(extent(shape_file), resolution = resolut, crs = CRS("+proj=longlat +datum=WGS84"))
+  grid <- raster(extent(shapeFile), resolution = resolut, crs = CRS("+proj=longlat +datum=WGS84"))
   grid <- raster::extend(grid, c(1, 1))
   gridPolygon <- rasterToPolygons(grid)
   # suppressWarnings(proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")) # datum WGS84
@@ -24,53 +24,26 @@ gridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, xmi
   
   
   # clipping the intersected cells:
-  cropped_map <- raster::intersect(gridPolygon, shape_file)
-  # plot(cropped_map)
-  # cropped_map <- vect(cropped_map, geom = c("x", "y"), crs = crs("+proj=longlat +datum=WGS84"))
-  
-  #########
-  # producing a raster of the shape_file
-  mask.raster <- raster(extent(gridPolygon), resolution = resolut,
-                        crs = CRS("+proj=longlat +datum=WGS84"))
-  r <- rasterize(shape_file, mask.raster)
+  cropped_map <- raster::intersect(gridPolygon, shapeFile)
+  # plot(cropped_map, xlim = c(xmin, xmax), ylim = c(ymin, ymax), axes = T)
+  r <- rasterize(shapeFile, mask.raster, fun = 'first')
   proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-  # mask.raster[is.na(mask.raster)] <- 0
   r <- merge(r, mask.raster)
-  # plot(r)
-  
   ncellR <- ncell(r)
-  # 
-  # # set the cells associated with the shape_file to the specified value
   r[r > 0] <- NA
-  
-  # data frame com os grids escolhidos
-  grid_n <- gridCell
-  # frameTemp <- read.table(file = 'out/pres_abs.txt', h = T, sep = '')
-  frameTemp <- data.frame(spp = 'numEscolhido', grid_n = grid_n, row.names = 1:length(grid_n))
-  # frameTemp
-  
-  # tabela com todas as células:
-  coor.l <- matrix(NA, nr = ncellras, nc = length(taxon), dimnames = list(seq(1:ncellras),
-                      taxon)[c(1:2)])  # tabela com todas as células
-  
-  
-  
-  
-  # matrix with species names and grid numbers:
-  resulPaeRaster <- matrix(as.matrix(frameTemp[,2]), nrow(frameTemp),
-                           1, dimnames = list(frameTemp[,1], colnames(frameTemp)[2]))
-  
-  for(j in 1:dim(resulPaeRaster)[1]){
-    gTrack <- resulPaeRaster[j, 1]
-    values(r)[gTrack] <- 1
+  for(i in 1:length(gridCell)){
+    for(j in 1:ncellR){
+      if(j == gridCell[i]){
+        values(r)[j] <- 1
+      }
+    }
   }
-  # r[is.na(r)]<-0
   
-  # r <- r[na.exclude(r)]
-  
-  #convert the raster to points for plotting the number of a grid
   map.r <- as.data.frame(rasterToPoints(r))
-  pontosRaster <- rasterize(cbind(map.r$x, map.r$y), r, field = 1) # raster com as presenças
+  pontosRaster <- rasterize(cbind(map.r$x, map.r$y), r, mask = T)
+  # plot(pontosRaster)
+  gridNumber <- which(pontosRaster@data@values == 1)
+  # map.r$gridNumber <- which(pontosRaster@data@values == 1)
   
   writeRaster(pontosRaster, 'out/resultPAE_PCE.tif', format = "GTiff", overwrite = TRUE)
   
@@ -86,15 +59,15 @@ gridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, xmi
   for(i in speciesN){
     contando <- contando + 1
     tempT <- subset(coordina, coordina$spp == i)
-    points(tempT[, c(2, 3)], pch = 16, col = adjustcolor(col = names(cols1[contando]), alpha = transp), cex = 1)
+    points(tempT[, c(2, 3)], pch = 16, col = adjustcolor(col = names(cols1[contando]), alpha = 0.6), cex = 1)
   }
   legend(x = "bottomleft", legend = speciesN, pch = 16, col = names(cols1[1:length(speciesN)]),
          title = 'Species',  title.col = 'red', pt.cex = 0.6, cex = 0.6)
   
-  plot(r, add = T, axes = F, legend = F, col = colores, alpha = transp/2, breaks = brks)
+  plot(pontosRaster, add = T, axes = F, legend = F, col = colores, alpha = 0.40)
   
   map.r$gridNumber <- which(pontosRaster@data@values == 1)
   
-  text(map.r[,c(1, 2)], labels = map.r$gridNumber, cex = (2 * resolut[1]) / resolut[1], col = 'black', font = 2)
-  
+  text(subset(map.r[,c(1, 2)], map.r$layer == 1), labels = gridNumber, cex = (2 * resolut[1]) / resolut[1],
+       col = adjustcolor(col = 'black', alpha = 0.6), font = 2)
 }
