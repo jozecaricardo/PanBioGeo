@@ -77,10 +77,10 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   if(is.na(proj4string(shape_file)) == TRUE){
     print('Attention: your shapefile has not been associated to any datum and this routine is going
             to associate it to WGS84 datum!')
-    proj4string(shape_file) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+    # proj4string(shape_file) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
     projection(shape_file) <- CRS("+proj=longlat +datum=WGS84")
   } else if (proj4string(shape_file) != "+proj=longlat +datum=WGS84"){
-    proj4string(shape_file) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+    # proj4string(shape_file) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
     projection(shape_file) <- CRS("+proj=longlat +datum=WGS84")
   }
   
@@ -116,7 +116,22 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   # clipping the intersected cells:
   suppressWarnings(cropped_map <- raster::intersect(gridPolygon, shape_file))
   if (seeres == TRUE){
-    plot(cropped_map, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+    plot(cropped_map, xlim = c(xmin, xmax), ylim = c(ymin, ymax), axes = T)
+    r <- rasterize(shape_file, mask.raster, fun = 'first')
+    proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+    r <- merge(r, mask.raster)
+    ncellR <- ncell(r)
+    for(j in 1:ncellR){
+      if(is.na(r[j]) == FALSE){
+        values(r)[j] <- 1
+      }
+    }
+    map.r <- as.data.frame(rasterToPoints(r))
+    pontosRaster <- rasterize(cbind(map.r$x, map.r$y), r, field = 1)
+    # plot(pontosRaster, add = T)
+    map.r$gridNumber <- which(pontosRaster@data@values == 1)
+    text(map.r[,c(1, 2)], labels = map.r$gridNumber, cex = (2 * resolut[1]) / resolut[1],
+         col = adjustcolor(col = 'black', alpha = 0.6), font = 2)
   }
   
   # producing a raster of the shapefile
