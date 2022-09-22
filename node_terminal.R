@@ -52,7 +52,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
     layout(1:2, 1, 2)
   }
   if(seeres == TRUE){
-    layout(matrix(c(1, 2), nrow = 1, ncol = 2, byrow = F))
+    layout(matrix(1, nr = 1, nc = 1, byrow = F))
   }
   if(seephylog == TRUE && seeres == TRUE){
     layout(matrix(c(1, 2, 3), nrow = 3, ncol = 1, byrow = F))
@@ -117,6 +117,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   suppressWarnings(cropped_map <- raster::intersect(gridPolygon, shape_file))
   if (seeres == TRUE){
     plot(cropped_map, xlim = c(xmin, xmax), ylim = c(ymin, ymax), axes = T)
+    mask.raster <- raster(extent(shape_file), resolution = resol,
+                          crs = CRS("+proj=longlat +datum=WGS84"))
     r <- rasterize(shape_file, mask.raster, fun = 'first')
     proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
     r <- merge(r, mask.raster)
@@ -130,8 +132,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
     pontosRaster <- rasterize(cbind(map.r$x, map.r$y), r, field = 1)
     # plot(pontosRaster, add = T)
     map.r$gridNumber <- which(pontosRaster@data@values == 1)
-    text(map.r[,c(1, 2)], labels = map.r$gridNumber, cex = (2 * resolut[1]) / resolut[1],
-         col = adjustcolor(col = 'black', alpha = 0.6), font = 2)
+    text(map.r[,c(1, 2)], labels = map.r$gridNumber, cex = 0.8,
+         col = adjustcolor(col = 'red', alpha = 1), font = 2)
   }
   
   # producing a raster of the shapefile
