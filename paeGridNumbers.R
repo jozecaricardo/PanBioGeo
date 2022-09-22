@@ -26,6 +26,8 @@ paeGridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, 
   # clipping the intersected cells:
   cropped_map <- raster::intersect(gridPolygon, shape_file)
   # plot(cropped_map, xlim = c(xmin, xmax), ylim = c(ymin, ymax), axes = T)
+  mask.raster <- raster(extent(shape_file), resolution = resolut,
+                        crs = CRS("+proj=longlat +datum=WGS84"))
   r <- rasterize(shape_file, mask.raster, fun = 'first')
   proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
   r <- merge(r, mask.raster)
