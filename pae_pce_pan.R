@@ -345,18 +345,29 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
       break
     }
     
-    for(j in roundResCol){
-      discre <- matTemp2[, as.character(j)]
+    quantum <- 1
+    for(j in 1:length(roundResCol)){
+      k <- roundResCol[quantum]
+      discre <- matTemp2[, as.character(k)]
       for(a in 1:length(discre)){
-        ifelse(discre[a] == 1, discre[a] <- j, discre[a] <- 'absent')
+        ifelse(discre[a] == 1, discre[a] <- k, discre[a] <- 'absent')
       } # vector with the presence and absence of one species
       #This maps the character (i.e., taxon).
       # x11()
       # plotBranchbyTrait(chartree, tempMatrix[,which(ciVec == 1)])
       ## simulate single stochastic character map using empirical Bayes method
+      
+      if(all(discre == 'absent')){
+        quantum <- quantum + 1
+        print(paste0(k, 'is outside of map! Please check it!'))
+        next
+      }
+      
       discre <- as.factor(discre)  ### vetor de presença da espécie
       
-      lista_TT[[j]] <- names(discre)[which(discre == j)]
+      lista_TT[[k]] <- names(discre)[which(discre == k)]
+      
+      quantum <- quantum + 1
     }
     
     # adic <- dim(matTemp2)[2] - length(which(colnames(matTemp2) == roundResCol))
@@ -501,19 +512,33 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
     
     nomesCOL <- colnames(matTemp) # species which are not synapomorphies
 
-    for(j in nomesCOL){
-      discre <- matTemp[, as.character(j)]
+    quantum <- 1
+    for(j in 1:length(nomesCOL)){
+      k <- nomesCOL[quantum]
+      discre <- matTemp[, as.character(k)]
       for(a in 1:length(discre)){
-        ifelse(discre[a] == 1, discre[a] <- j, discre[a] <- 'absent')
+        ifelse(discre[a] == 1, discre[a] <- k, discre[a] <- 'absent')
       } # vector with the presence and absence of one species
       #This maps the character (i.e., taxon).
       # x11()
       # plotBranchbyTrait(chartree, tempMatrix[,which(ciVec == 1)])
       ## simulate single stochastic character map using empirical Bayes method
+      
+      if(all(discre == 'absent')){
+        quantum <- quantum + 1
+        print(paste0(k, 'is outside of map! Please check it!'))
+        next
+      }
+      
       discre <- as.factor(discre)  ### vetor de presença da espécie
-
-      lista_T[[j]] <- names(discre)[which(discre == j)]
+      
+      lista_T[[k]] <- names(discre)[which(discre == k)]
+      
+      quantum <- quantum + 1
+      # print(length(unlist(lista_T[[k]])))
     }
+    
+    # unlist(lista_T)[unlist(lista_T) %in% n_occur$Var1[n_occur$Freq > 1]]
 
     speciesNames <- names(lista_T)
 
