@@ -299,7 +299,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
                       unique(rownames(tempo))[c(1:length(taxon))]))  # tabela com todas as células
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
 
-        writeRaster(linhasRaster, "out/presence_mintreeall.tif", format = "GTiff",
+        writeRaster(linhasRaster, "out/presence_mintreeall.tif",
                     overwrite = TRUE)
     
         plot(linhasRaster, axes = FALSE, legend = FALSE, add = TRUE, col = cols1[1],
