@@ -341,10 +341,10 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           tempo_shape <- lats2Shape(lats = tempo.d)
           # dir.create('out/')
           write.shapefile(tempo_shape, paste0(c('out/pointshape_', j), collapse = ''))
-          resul1_shape <- rgdal::readOGR(dsn = paste0(c('out/pointshape_', j, '.shp'),
-                                                      collapse = ''), verbose = FALSE)
+          resul1_shape <- vect(paste0(c('out/pointshape_', j, '.shp'),
+                collapse = ''), crs = "+proj=longlat +datum=WGS84")
           # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
-          proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+          # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           
           ##### MST based on geographic distance #####
           rownames(resul1_shape@coords) <- rownames(tempo.d)
@@ -446,7 +446,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         tempo.d <- as.data.frame(tempo)
         tempo_shape <- lats2Shape(lats = tempo.d)
         write.shapefile(tempo_shape, 'out/pointsshape_mintreeall')
-        resul1_shape <- rgdal::readOGR(dsn = 'out/pointsshape_mintreeall.shp', verbose = FALSE)
+        resul1_shape <- vect('out/pointsshape_mintreeall.shp', crs = "+proj=longlat +datum=WGS84")
         # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
         proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         
@@ -531,10 +531,10 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           tempo.d <- as.data.frame(tempoo)
           tempo_shape <- lats2Shape(lats = tempo.d)
           write.shapefile(tempo_shape, paste0(c('out/pointshape_', j), collapse = ''))
-          resul1_shape <- rgdal::readOGR(dsn = paste0(c('out/pointshape_', j, '.shp'),
-                                                      collapse = ''), verbose = FALSE)
+          resul1_shape <- vect(paste0(c('out/pointshape_', j, '.shp'),
+                      collapse = ''), crs = "+proj=longlat +datum=WGS84")
           # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
-          proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+          # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           
           # resul1_shape <- vect(resul1_shape, crs = "+proj=longlat")
           
@@ -733,26 +733,29 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         tempo_shape <- lats2Shape(lats = tempo.d)
         # dir.create('temp/')
         write.shapefile(tempo_shape, 'out/ancterminal_points_mintreeall')
-        resul1_shape <- rgdal::readOGR(dsn = 'out/ancterminal_points_mintreeall.shp', verbose = FALSE)
-        proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-        projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
+        resul1_shape <- vect('out/ancterminal_points_mintreeall.shp',
+         crs = "+proj=longlat +datum=WGS84")
+        # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+        # projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
         
         #only terminals:
         tempo_temp.d <- as.data.frame(tempo.temp)
         tempo_shape.temp <- lats2Shape(lats = tempo_temp.d)
         write.shapefile(tempo_shape.temp, 'out/points_mintreeall_onlyterminal')
-        resul1_shape.temp <- rgdal::readOGR(dsn = 'out/points_mintreeall_onlyterminal.shp', verbose = FALSE)
-        proj4string(resul1_shape.temp) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-        projection(resul1_shape.temp) <- CRS("+proj=longlat +datum=WGS84")
+        resul1_shape.temp <- vect('out/points_mintreeall_onlyterminal.shp',
+          crs = "+proj=longlat +datum=WGS84")
+        # proj4string(resul1_shape.temp) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+        # projection(resul1_shape.temp) <- CRS("+proj=longlat +datum=WGS84")
       }
       
       #only internal nodes:
       tempo_temp.d2 <- as.data.frame(tempo.temp2)
       tempo_shape.temp <- lats2Shape(lats = tempo_temp.d2)
       write.shapefile(tempo_shape.temp, 'out/points_mintreeall_onlyinternal')
-      resul2_shape.temp <- rgdal::readOGR(dsn = 'out/points_mintreeall_onlyinternal.shp', verbose = FALSE)
-      proj4string(resul2_shape.temp) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-      projection(resul2_shape.temp) <- CRS("+proj=longlat +datum=WGS84")
+      resul2_shape.temp <- vect('out/points_mintreeall_onlyinternal.shp',
+       crs = "+proj=longlat +datum=WGS84")
+      # proj4string(resul2_shape.temp) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+      # projection(resul2_shape.temp) <- CRS("+proj=longlat +datum=WGS84")
       
       if(!is.null(taxon)){
         ##### total MST based on geographic distance #####
