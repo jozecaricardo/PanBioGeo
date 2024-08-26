@@ -253,7 +253,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         ##### MST based on geographic distance #####
         # rownames(resul1_shape@coords) <- rownames(tempo.d)
         # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
-        dista <- earth.dist(lats = resul1_shape)
+        dista <- earth.dist(lats = as(resul1_shape, 'Spatial'))
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
@@ -274,7 +274,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # plotting shapes
         pontos_linha <- shapefile('out/mst_mintreeall.shp', warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
-        projection(pontos_linha) <- CRS("+proj=longlat +datum=WGS84")
+        # projection(pontos_linha) <- CRS("+proj=longlat +datum=WGS84")
         
         plot(pontos_linha, col = cols1[1], lwd = 3, add = T)
         plot(resul1_shape, cex = 1.1, pch = 21, bg = cols1[1:length(taxon)], add = T)
@@ -299,7 +299,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         }
 
         # back-transforming lines in points:
-        pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular')
+        suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
         
         # presence-absence matrix:
         ncellras <- ncell(r)
@@ -354,7 +354,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           ##### MST based on geographic distance #####
           # rownames(resul1_shape@coords) <- rownames(tempo.d)
           # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
-          dista <- earth.dist(lats = resul1_shape)
+          dista <- earth.dist(lats = as(resul1_shape, 'Spatial'))
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
@@ -393,7 +393,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           
           
           # back-transforming lines in points:
-          pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular')
+          suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
           
           
           lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
