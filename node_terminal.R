@@ -251,13 +251,18 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         
         
         ##### MST based on geographic distance #####
-        rownames(resul1_shape@coords) <- rownames(tempo.d)
-        colnames(resul1_shape@coords) <- c('longitude', 'latitude')
+        # rownames(resul1_shape@coords) <- rownames(tempo.d)
+        # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
         dista <- earth.dist(lats = resul1_shape)
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
-        mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
+        lats <- cbind(resul1_shape$LONG,
+              resul1_shape$LAT)
+        rownames(lats) <- rownames(tempo.d)
+        colnames(lats) <- c('longitude', 'latitude')
+        mst_shape <- msn2Shape(msn = mst2, lats = lats)
+        # mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
         write.shapefile(mst_shape, 'out/mst_mintreeall')
         
         if(!is.null(tree)){
@@ -347,13 +352,18 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           
           ##### MST based on geographic distance #####
-          rownames(resul1_shape@coords) <- rownames(tempo.d)
-          colnames(resul1_shape@coords) <- c('longitude', 'latitude')
+          # rownames(resul1_shape@coords) <- rownames(tempo.d)
+          # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
           dista <- earth.dist(lats = resul1_shape)
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
-          mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
+          lats <- cbind(resul1_shape$LONG,
+              resul1_shape$LAT)
+          rownames(lats) <- rownames(tempo.d)
+          colnames(lats) <- c('longitude', 'latitude')
+          mst_shape <- msn2Shape(msn = mst2, lats = lats)
+          # mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
           write.shapefile(mst_shape, paste0(c('out/mst_', j), collapse = ''))
           
           if(!is.null(tree)){
@@ -448,16 +458,26 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         write.shapefile(tempo_shape, 'out/pointsshape_mintreeall')
         resul1_shape <- vect('out/pointsshape_mintreeall.shp', crs = "+proj=longlat +datum=WGS84")
         # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
-        proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+        # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         
         ##### MST based on geographic distance #####
-        rownames(resul1_shape@coords) <- rownames(tempo.d)
-        colnames(resul1_shape@coords) <- c('longitude', 'latitude')
-        dista <- earth.dist(lats = resul1_shape)
+        # # rownames(resul1_shape@coords) <- rownames(tempo.d)
+        # # # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
+        di# sta <- earth.dist(lats = as(resul1_shape, 'Spatial'))
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
-        mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
+        lats <- cbind(resul1_shape$LONG,
+              resul1_shape$LAT)
+          rownames(lats) <- rownames(tempo.d)
+          colnames(lats) <- c('longitude', 'latitude')
+          mst_shape <- msn2Shape(msn = mst2, lats = lats)
+        la          resul1_shape$LAT)
+          rownames(lats) <- rownames(tempo.d)
+          colnames(lats) <- c('longitude', 'latitude')
+          mst_shape <- msn2Shape(msn = mst2, lats = lats)
+          ames(lats) <- c('longitude', 'latitude')
+        mst_shape <- msn2Shape(msn = mst2, lats = lats)
         write.shapefile(mst_shape, 'out/mst_mintreeall')
         
         if(!is.null(tree)){
@@ -539,13 +559,17 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           # resul1_shape <- vect(resul1_shape, crs = "+proj=longlat")
           
           ##### MST based on geographic distance #####
-          rownames(resul1_shape@coords) <- rownames(tempo.d)
-          colnames(resul1_shape@coords) <- c('longitude', 'latitude')
+          # rownames(resul1_shape@coords) <- rownames(tempo.d)
+          # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
           dista <- earth.dist(lats = resul1_shape)
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
-          mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
+          lats <- cbind(resul1_shape$LONG,
+              resul1_shape$LAT)
+          rownames(lats) <- rownames(tempo.d)
+          colnames(lats) <- c('longitude', 'latitude')
+          mst_shape <- msn2Shape(msn = mst2, lats = lats)
           write.shapefile(mst_shape, paste0(c('out/mst_', j), collapse = ''))
           
           if(!is.null(tree)){
@@ -759,13 +783,18 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
       
       if(!is.null(taxon)){
         ##### total MST based on geographic distance #####
-        rownames(resul1_shape@coords) <- rownames(tempo.d)
-        colnames(resul1_shape@coords) <- c('longitude', 'latitude')
+        # rownames(resul1_shape@coords) <- rownames(tempo.d)
+        # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
         dista <- earth.dist(lats = resul1_shape)
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
-        mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
+        lats <- cbind(resul1_shape$LONG,
+              resul1_shape$LAT)
+        rownames(lats) <- rownames(tempo.d)
+        colnames(lats) <- c('longitude', 'latitude')
+        mst_shape <- msn2Shape(msn = mst2, lats = lats)
+        # mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
         write.shapefile(mst_shape, 'out/mst_ancterminal_mintreeall')
         
         if(!is.null(tree)){
@@ -1105,13 +1134,18 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
           
           ##### MST based on geographic distance #####
-          rownames(resul1_shape@coords) <- rownames(tempo.d)
-          colnames(resul1_shape@coords) <- c('longitude', 'latitude')
+          # rownames(resul1_shape@coords) <- rownames(tempo.d)
+          # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
           dista <- earth.dist(lats = resul1_shape)
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
-          mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
+          lats <- cbind(resul1_shape$LONG,
+              resul1_shape$LAT)
+          rownames(lats) <- rownames(tempo.d)
+          colnames(lats) <- c('longitude', 'latitude')
+          mst_shape <- msn2Shape(msn = mst2, lats = lats)
+          # mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
           write.shapefile(mst_shape, paste0(c('out/mst_', j), collapse = ''))
           
           print(paste0(c(contas + contass, ') calculating mst... Done'), collapse = ''))
