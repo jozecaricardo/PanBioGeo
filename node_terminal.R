@@ -257,8 +257,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
-        lats <- cbind(resul1_shape$LONG,
-              resul1_shape$LAT)
+        lats <- cbind(resul1_shape$Long,
+              resul1_shape$Lat)
         rownames(lats) <- rownames(tempo.d)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -358,8 +358,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
-          lats <- cbind(resul1_shape$LONG,
-              resul1_shape$LAT)
+          lats <- cbind(resul1_shape$Long,
+              resul1_shape$Lat)
           rownames(lats) <- rownames(tempo.d)
           colnames(lats) <- c('longitude', 'latitude')
           mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -501,7 +501,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         }
         
         # back-transforming lines in points:
-        pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular')
+        suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
         
         # presence-absence matrix:
         # ncellras <- ncell(r)
@@ -555,7 +555,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           ##### MST based on geographic distance #####
           # rownames(resul1_shape@coords) <- rownames(tempo.d)
           # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
-          dista <- earth.dist(lats = resul1_shape)
+          dista <- earth.dist(lats = as(resul1_shape, 'Spatial'))
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
@@ -593,7 +593,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           
           
           # back-transforming lines in points:
-          pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular')
+          suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
           
           
           lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
@@ -863,7 +863,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         }
 
         # back-transforming lines in points:
-        pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular')
+        suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
         
         # presence-absence matrix:
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo))), dimnames = list(seq(1:ncellras),
