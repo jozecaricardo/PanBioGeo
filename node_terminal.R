@@ -74,12 +74,12 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   }
   
   # plotting the tree and coordinates:
-  if(is.na(proj4string(shape_file)) == TRUE){
+  if(is.na(proj4string(as(shape_file, 'Spatial'))) == TRUE){
     print('Attention: your shapefile has not been associated to any datum and this routine is going
             to associate it to WGS84 datum!')
     # proj4string(shape_file) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
     projection(shape_file) <- CRS("+proj=longlat +datum=WGS84")
-  } else if (proj4string(shape_file) != "+proj=longlat +datum=WGS84"){
+  } else if(proj4string(as(shape_file, 'Spatial')) != "+proj=longlat +datum=WGS84"){
     # proj4string(shape_file) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
     projection(shape_file) <- CRS("+proj=longlat +datum=WGS84")
   }
