@@ -243,10 +243,11 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         tempo_shape <- lats2Shape(lats = tempo.d)
         # dir.create('out/')
         write.shapefile(tempo_shape, 'out/pointsshape_mintreeall')
-        resul1_shape <- rgdal::readOGR(dsn = 'out/pointsshape_mintreeall.shp', verbose = FALSE)
+        # resul1_shape <- rgdal::readOGR(dsn = 'out/pointsshape_mintreeall.shp', verbose = FALSE)
         # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
-        proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-        projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
+        resul1_shape <- vect('out/pointsshape_mintreeall.shp', crs = "+proj=longlat +datum=WGS84")
+        # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+        # projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
         
         
         ##### MST based on geographic distance #####
