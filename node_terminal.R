@@ -22,7 +22,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   library(phytools)
   library(maptools); library(letsR); library(fossil)
   library(viridis); library(mapdata); library(vegan); library(spdep)
-  library(dismo); library(spatstat)
+  library(dismo); library(spatstat); library(terra)
   
   if(length(taxon) < 2){
     warning('It is not possible with only one species to produce generalized tracks by the PAE-PCE analysis!')
@@ -98,28 +98,33 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
     print('3) dividing polygon into grid and producing a raster...')
   }
   
-  arv <- reorder(tree, "postorder") # reordering the levels
-  e1 <- arv$edge[, 1] # internal nodes
-  e2 <- arv$edge[, 2] # terminal nodes and root
-  EL <- arv$edge.length # branch lengths
+  if(!is.null(tree)){
+    arv <- reorder(tree, "postorder") # reordering the levels
+    e1 <- arv$edge[, 1] # internal nodes
+    e2 <- arv$edge[, 2] # terminal nodes and root
+    EL <- arv$edge.length # branch lengths
+    
+    tabelao <- mrca(phy = tree, full = F)
+  }
   
-  tabelao <- mrca(phy = tree, full = F)
 
-  grid <- raster(extent(shape_file), resolution = resol, crs = CRS("+proj=longlat +datum=WGS84"))
+  grid <- raster(extent(as(shape_file, 'Spatial')), resolution = resol,
+                 crs = CRS("+proj=longlat +datum=WGS84"))
   grid <- raster::extend(grid, c(1, 1))
   gridPolygon <- rasterToPolygons(grid)
-  suppressWarnings(proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")) # datum WGS84
+  # suppressWarnings(proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")) # datum WGS84
   #proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
   # projection(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")
   
   
   # clipping the intersected cells:
-  suppressWarnings(cropped_map <- raster::intersect(gridPolygon, shape_file))
+  # suppressWarnings(cropped_map <- raster::intersect(gridPolygon, shape_file))
+  cropped_map <- raster::intersect(gridPolygon, as(shape_file, 'Spatial'))
   if (seeres == TRUE){
     plot(cropped_map, xlim = c(xmin, xmax), ylim = c(ymin, ymax), axes = T)
-    mask.raster <- raster(extent(shape_file), resolution = resol,
+    mask.raster <- raster(extent(as(shape_file, 'Spatial')), resolution = resol,
                           crs = CRS("+proj=longlat +datum=WGS84"))
-    r <- rasterize(shape_file, mask.raster, fun = 'first')
+    r <- rasterize(as(shape_file, 'Spatial'), mask.raster, fun = 'first')
     proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
     r <- merge(r, mask.raster)
     ncellR <- ncell(r)
@@ -137,9 +142,9 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   }
   
   # producing a raster of the shapefile
-  mask.raster <- raster(extent(shape_file), resolution = resol,
+  mask.raster <- raster(extent(as(shape_file, 'Spatial')), resolution = resol,
                         crs = CRS("+proj=longlat +datum=WGS84"))
-  suppressWarnings(r <- rasterize(shape_file, mask.raster))
+  suppressWarnings(r <- rasterize(as(shape_file, 'Spatial'), mask.raster))
   proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
   # mask.raster[is.na(mask.raster)] <- 0
   r <- merge(r, mask.raster)
@@ -420,6 +425,17 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
     } else if(is.null(taxon)){ # null taxa
 
       tempo <- coordin
+      
+      # tempo <- as.data.frame(na.exclude(tempo))
+      # colnames(tempo) <- c('species', colnames(coordin[, c(1, 2)]))
+      
+      Long <- tempo[,1]
+      Lat <- tempo[, 2]
+      names(Long) <- rownames(tempo)
+      
+      tempo <- matrix(cbind(as.numeric(Long), as.numeric(Lat)), nrow(tempo), 2, dimnames = list(rownames(tempo),
+                                  colnames(tempo)[c(1,2)]))
+      
 
       if(mintreeall == TRUE){
         
@@ -517,6 +533,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
           proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           
+          # resul1_shape <- vect(resul1_shape, crs = "+proj=longlat")
+          
           ##### MST based on geographic distance #####
           rownames(resul1_shape@coords) <- rownames(tempo.d)
           colnames(resul1_shape@coords) <- c('longitude', 'latitude')
@@ -563,8 +581,9 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
             collapse = ''), format = "GTiff", overwrite = TRUE)
   
-          teste <- tabelao[j,j] # posições dos táxons do nó
-          text(tempoo, labels = rep(teste, dim(tempo)[1]), cex = 0.8, pos = 2, col = cols1[j])
+          # teste <- tabelao[j,j] # posições dos táxons do nó
+          teste <- conta
+          text(tempoo, labels = rep(teste, dim(tempo)[1]), cex = 0.5, pos = 2, col = cols1[j])
           
           # presence-absence matrix:
           # preparing the matrix
@@ -978,80 +997,87 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
       }
       
       # first, to internal nodes...
-      lista_r <- list()
+      # lista_r <- list()
       conta <- 0
-        
-      for(j in unique(rownames(tempo.n))){
-        conta <- conta + 1
-        tempoo <- subset(tempo.n[, 1:2], rownames(tempo.n) == j)
-        
-        #### shapefile ###
-        tempo.d <- as.data.frame(tempoo)
-        tempo_shape <- lats2Shape(lats = tempo.d)
-        # dir.create('out/')
-        write.shapefile(tempo_shape, paste0(c('out/pointshape_', j), collapse = ''))
-        resul1_shape <- rgdal::readOGR(dsn = paste0(c('out/pointshape_', j, '.shp'),
-                                                    collapse = ''), verbose = FALSE)
-        # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
-        proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-        suppressWarnings(projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84"))
-        
-        ##### MST based on geographic distance #####
-        rownames(resul1_shape@coords) <- rownames(tempo.d)
-        colnames(resul1_shape@coords) <- c('longitude', 'latitude')
-        dista <- earth.dist(lats = resul1_shape)
-        mst2 <- dino.mst(dista)
-        rownames(mst2) <- rownames(tempo.d)
-        colnames(mst2) <- rownames(tempo.d)
-        mst_shape <- msn2Shape(msn = mst2, lats = resul1_shape, dist = NULL)
-        write.shapefile(mst_shape, paste0(c('out/mst_', j), collapse = ''))
-        
-        if(!is.null(tree)){
-          print(paste0(c(conta + 5, ') calculating mst... Done'), collapse = ''))
-          contass <- conta + 5
-        } else {
-          print(paste0(c(conta + 4, ') calculating mst... Done'), collapse = ''))
-          contass <- conta + 4
-        }
-        
-        # plotting shapes
-        pontos_linha <- shapefile(paste0(c('out/mst_', j, '.shp'), collapse = ''),
-                                  warnPRJ = FALSE)
-        proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
-        plot(pontos_linha, col = 'red', lwd = 3, lty = 2, add = T)
-        plot(resul1_shape, cex = 1.1, pch = 21, bg = cols1[j], add = T)
-        
-        # labels:
-        text(resul1_shape, labels = rep(nodes[unique(tempo.n[which(rownames(tempo.n) == j), 3])],
-                          dim(tempoo)[1]), cex = 0.6, pos = 1, col = 'black')
-        
-        # minimum convex polygon
-        if(pol == TRUE){
-          conv <- convexhull.xy(tempoo)
-          plot(conv, add = T, col = adjustcolor(cols1[j], transp))
-          write.shapefile(conv, paste0(c('out/mcp_', j), collapse = ''))
-        }              
-              
-        # back-transforming lines in points:
-        suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
-                
-        lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
-        suppressWarnings(writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
-            collapse = ''), format = "GTiff", overwrite = TRUE))
-
-        plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE,
-             col = cols1[unique(tempo.n[which(rownames(tempo.n) == j), 3])], alpha = transp)
-              
-        # presence-absence matrix:
-        # preparing the matrix
+      
+      tempoo <- tempo.n[, 1:2]
+      
+      #### shapefile ###
+      tempo.d <- as.data.frame(tempoo)
+      tempo_shape <- lats2Shape(lats = tempo.d)
+      # dir.create('out/')
+      write.shapefile(tempo_shape, paste0(c('out/pointshape_node', nodes), collapse = ''))
+      resul1_shape <- vect(paste(c('out/pointshape_node', nodes, '.shp'),
+                                 collapse = ''), crs = "+proj=longlat +datum=WGS84")
+      # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
+      # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+      # suppressWarnings(projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84"))
+      
+      ##### MST based on geographic distance #####
+      # rownames(resul1_shape@coords) <- rownames(tempo.d)
+      # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
+      dista <- earth.dist(lats = as(resul1_shape, 'Spatial'))
+      mst2 <- dino.mst(dista)
+      rownames(mst2) <- rownames(tempo.d)
+      colnames(mst2) <- rownames(tempo.d)
+      lats <- cbind(resul1_shape$LONG,
+                    resul1_shape$LAT)
+      rownames(lats) <- rownames(tempo.d)
+      colnames(lats) <- c('longitude', 'latitude')
+      mst_shape <- msn2Shape(msn = mst2, lats = lats, dist = NULL)
+      write.shapefile(mst_shape, paste0(c('out/mst_node_', nodes), collapse = ''))
+      
+      if(!is.null(tree)){
+        print(paste0(c(conta + 5, ') calculating mst... Done'), collapse = ''))
+        contass <- conta + 5
+      } else {
+        print(paste0(c(conta + 4, ') calculating mst... Done'), collapse = ''))
+        contass <- conta + 4
+      }
+      
+      # plotting shapes
+      pontos_linha <- vect(paste0(c('out/mst_node_', nodes, '.shp'), collapse = ''),
+                           crs = "+proj=longlat +datum=WGS84")
+      # proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
+      plot(pontos_linha, col = 'red', lwd = 3, lty = 2, add = T)
+      plot(resul1_shape, cex = 1.1, pch = 21, bg = cols1[5], add = T)
+      
+      # labels:
+      for(j in 1:length(nodes)){
+        text(tempo.n[which(tempo.n [, 3] == j), c(1, 2)],
+             labels = rep(nodes[j], dim(tempo.n[which(tempo.n [, 3] == j), c(1, 2)])[1]),
+             cex = 0.6, pos = 1, col = 'black')
+      }
+      
+      # minimum convex polygon
+      if(pol == TRUE){
+        conv <- convexhull.xy(tempoo)
+        plot(conv, add = T, col = adjustcolor(cols1[j], transp))
+        write.shapefile(conv, paste0(c('out/mcp_node_', nodes), collapse = ''))
+      }              
+      
+      # back-transforming lines in points:
+      suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
+      
+      lista_r <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
+      writeRaster(lista_r, paste0(c("out/presence_mst_", nodes, ".tif"), 
+                                  collapse = ''), overwrite = TRUE)
+      
+      plot(lista_r, axes = FALSE, legend = FALSE, add = TRUE,
+           col = cols1[5], alpha = transp)
+      
+      # presence-absence matrix:
+      # preparing the matrix
+      for(k in unique(rownames(tempo.n))){
         for(i in 1:ncellras){
-          if(is.na(r[i]) == FALSE && is.na(lista_r[[conta]][i]) == FALSE){
-            coor.l[i, conta] <- 1
-          } else if(is.na(r[i]) == FALSE && is.na(lista_r[[conta]][i]) == TRUE){
-            coor.l[i, conta] <- 0
+          if(is.na(r[i]) == FALSE && is.na(lista_r[i]) == FALSE){
+            coor.l[i, k] <- 1
+          } else if(is.na(r[i]) == FALSE && is.na(lista_r[i]) == TRUE){
+            coor.l[i, k] <- 0
           }
         }
       }
+  
 
       if(!is.null(taxon)){
         #finally, the terminal nodes:   
