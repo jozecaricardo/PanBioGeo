@@ -146,7 +146,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   # producing a raster of the shapefile
   mask.raster <- raster(extent(as(shape_file, 'Spatial')), resolution = resol,
                         crs = CRS("+proj=longlat +datum=WGS84"))
-  suppressWarnings(r <- rasterize(as(shape_file, 'Spatial'), mask.raster))
+  r <- rasterize(as(shape_file, 'Spatial'), mask.raster)
   proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
   # mask.raster[is.na(mask.raster)] <- 0
   r <- merge(r, mask.raster)
@@ -398,7 +398,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           
           lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
-            collapse = ''), format = "GTiff", overwrite = TRUE)
+            collapse = ''), overwrite = TRUE)
           plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE,
                col = cols1[j], alpha = transp)
           # colocando labels:
@@ -467,8 +467,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
-        lats <- cbind(resul1_shape$LONG,
-              resul1_shape$LAT)
+        lats <- cbind(resul1_shape$Long,
+              resul1_shape$Lat)
         rownames(lats) <- rownames(tempo.d)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -508,7 +508,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo))), dimnames = list(seq(1:ncellras),
                       unique(rownames(tempo)))[c(1:2)])
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
-        writeRaster(linhasRaster, "out/presence_mintreeall.tif", format = "GTiff",
+        writeRaster(linhasRaster, "out/presence_mintreeall.tif",
                     overwrite = TRUE)
         plot(linhasRaster, axes = FALSE, legend = FALSE, add = TRUE, col = cols1[1], alpha = transp)
         
@@ -559,8 +559,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
-          lats <- cbind(resul1_shape$LONG,
-              resul1_shape$LAT)
+          lats <- cbind(resul1_shape$Long,
+              resul1_shape$Lat)
           rownames(lats) <- rownames(tempo.d)
           colnames(lats) <- c('longitude', 'latitude')
           mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -600,7 +600,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE, col = cols1[j],
                alpha = transp)
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
-            collapse = ''), format = "GTiff", overwrite = TRUE)
+            collapse = ''), overwrite = TRUE)
   
           # teste <- tabelao[j,j] # posições dos táxons do nó
           teste <- conta
@@ -1167,7 +1167,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
                   
           lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
-            collapse = ''), format = "GTiff", overwrite = TRUE)
+            collapse = ''), overwrite = TRUE)
           
           plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE, col = cols1[j],
                alpha = transp)
