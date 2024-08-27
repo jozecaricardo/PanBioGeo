@@ -118,7 +118,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   gridPolygon <- rasterToPolygons(grid)
   # suppressWarnings(proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")) # datum WGS84
   #proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-  # projection(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")
+  crs(gridPolygon) <- "+proj=longlat +datum=WGS84"
   
   
   # clipping the intersected cells:
