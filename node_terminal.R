@@ -245,7 +245,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         write.shapefile(tempo_shape, 'out/pointsshape_mintreeall')
         # resul1_shape <- rgdal::readOGR(dsn = 'out/pointsshape_mintreeall.shp', verbose = FALSE)
         # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
-        resul1_shape <- vect('out/pointsshape_mintreeall.shp', crs = "+proj=longlat +datum=WGS84")
+        resul1_shape <- vect('out/pointsshape_mintreeall.shp',
+         crs = "+proj=longlat +datum=WGS84")
         # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         # projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
         
@@ -290,7 +291,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         if(caption == TRUE){
           x <- taxon
           if(sobrepo == TRUE){
-            legend(x = extent(shape_file)[2] - 30, y = extent(shape_file)[4], legend = x, pch = 19, col = cols1[x], bty = 'n',
+            legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x, pch = 19, col = cols1[x], bty = 'n',
                  pt.cex = 0.6, cex = 0.6, title = 'Adding species...', title.col = 'red')
           } else {
             legend(x = "bottomleft", legend = x, pch = 19, col = cols1[x], title = 'Members of the minimum spanning tree',
@@ -419,7 +420,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         if(caption == TRUE){
           x <- taxon
           if(sobrepo == TRUE){
-            legend(x = extent(shape_file)[2] - 30, y = extent(shape_file)[4], legend = x, pch = 19, col = cols1[x],
+            legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x, pch = 19, col = cols1[x],
                  pt.cex = 0.6, cex = 0.6, title = 'Adding species...', title.col = 'red')
           } else {
               legend(x = "bottomleft", legend = x, pch = 19, col = cols1[x], title = 'Members of the minimum spanning tree(s)',
@@ -456,7 +457,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         tempo.d <- as.data.frame(tempo)
         tempo_shape <- lats2Shape(lats = tempo.d)
         write.shapefile(tempo_shape, 'out/pointsshape_mintreeall')
-        resul1_shape <- vect('out/pointsshape_mintreeall.shp', crs = "+proj=longlat +datum=WGS84")
+        resul1_shape <- vect('out/pointsshape_mintreeall.shp',
+         crs = "+proj=longlat +datum=WGS84")
         # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
         # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         
@@ -779,12 +781,12 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         ##### total MST based on geographic distance #####
         # rownames(resul1_shape@coords) <- rownames(tempo.d)
         # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
-        dista <- earth.dist(lats = resul1_shape)
+        dista <- earth.dist(lats = as(resul1_shape, 'Spatial'))
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
-        lats <- cbind(resul1_shape$LONG,
-              resul1_shape$LAT)
+        lats <- cbind(resul1_shape$Long,
+              resul1_shape$Lat)
         rownames(lats) <- rownames(tempo.d)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -800,7 +802,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # plotting shapes
         pontos_linha <- shapefile('out/mst_ancterminal_mintreeall.shp', warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
-        projection(pontos_linha) <- CRS("+proj=longlat +datum=WGS84")
+        # projection(pontos_linha) <- CRS("+proj=longlat +datum=WGS84")
         
         plot(pontos_linha, col = 'red', lwd = 3, lty = 2, add = T)
         plot(resul2_shape.temp, cex = 1.5, pch = 'o', add = T)
@@ -829,33 +831,33 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           xx <- unique(rownames(tempo.temp))
           if(length(anc) == 1){
             if(sobrepo == TRUE){
-              legend(x = extent(shape_file)[2] - 30, y = extent(shape_file)[4], legend = x,
+              legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                  pch = 'o', col = cols1[lis], title = paste0(c('Adding descendents from node ',
                    nodes, '...'), collapse = ''), title.col = 'red', pt.cex = 0.6, cex = 0.6)
-              legend(x = extent(shape_file)[1], y = extent(shape_file)[4], legend = xx,
+              legend(x = extent(as(shape_file, 'Spatial'))[1], y = extent(as(shape_file, 'Spatial'))[4], legend = xx,
                      pch = 'o', col = cols1[xx], title = 'Adding terminal(s)...', 
                      title.col = 'blue', pt.cex = 0.6, cex = 0.6)
             } else if(sobrepo == FALSE){
               legend(x = "bottomleft", legend = x,
                  pch = 'o', col = cols1[lis], title = paste0(c('Descendents from node ', nodes),
                         collapse = ''), title.col = 'red', pt.cex = 0.6, cex = 0.6)
-              legend(x = extent(shape_file)[1], y = extent(shape_file)[4], legend = xx,
+              legend(x = extent(as(shape_file, 'Spatial'))[1], y = extent(as(shape_file, 'Spatial'))[4], legend = xx,
                      pch = 'o', col = cols1[xx], title = 'Adding terminal(s)...', 
                      title.col = 'blue', pt.cex = 0.6, cex = 0.6)
             }
           } else if(length(anc) > 1){
             if(sobrepo == TRUE){
-              legend(x = extent(shape_file)[2] - 30, y = extent(shape_file)[4], legend = x,
+              legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                      pch = 'o', col = cols1[lis], title = paste0(c('Adding descendents from nodes',
                 nodes, '...'), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
-              legend(x = extent(shape_file)[1], y = extent(shape_file)[4], legend = xx,
+              legend(x = extent(as(shape_file, 'Spatial'))[1], y = extent(as(shape_file, 'Spatial'))[4], legend = xx,
                      pch = 'o', col = cols1[xx], title = 'Adding terminal(s)...', 
                      title.col = 'blue', pt.cex = 0.6, cex = 0.6)
             } else if(sobrepo == FALSE){
               legend(x = "bottomleft", legend = x,
                     pch = 'o', col = cols1[lis], title = paste0(c('Descendents from nodes', nodes),
                     collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
-              legend(x = extent(shape_file)[1], y = extent(shape_file)[4], legend = xx,
+              legend(x = extent(as(shape_file, 'Spatial'))[1], y = extent(as(shape_file, 'Spatial'))[4], legend = xx,
                      pch = 'o', col = cols1[xx], title = 'Adding terminal(s)...', 
                      title.col = 'blue', pt.cex = 0.6, cex = 0.6)
             }
@@ -884,13 +886,17 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         }
       } else {
         ##### MST of the internal nodes based on geographic distance #####
-        rownames(resul2_shape.temp@coords) <- rownames(tempo_temp.d2)
-        colnames(resul2_shape.temp@coords) <- c('longitude', 'latitude')
-        dista <- earth.dist(lats = resul2_shape.temp)
+        # rownames(resul2_shape.temp@coords) <- rownames(tempo_temp.d2)
+        # colnames(resul2_shape.temp@coords) <- c('longitude', 'latitude')
+        dista <- earth.dist(lats = as(resul2_shape.temp, 'Spatial'))
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo_temp.d2)
         colnames(mst2) <- rownames(tempo_temp.d2)
-        mst_shape <- msn2Shape(msn = mst2, lats = resul2_shape.temp, dist = NULL)
+        lats <- cbind(resul2_shape.temp$Long,
+                resul2_shape.temp$Lat)
+        rownames(lats) <- rownames(tempo_temp.d2)
+        colnames(lats) <- c('longitude', 'latitude')
+        mst_shape <- msn2Shape(msn = mst2, lats = lats)
         write.shapefile(mst_shape, 'out/mst_mintreeall_onlyinternal')
         
         if(!is.null(tree)){
@@ -902,7 +908,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # plotting shapes
         pontos_linha <- shapefile('out/mst_mintreeall_onlyinternal.shp', warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
-        projection(pontos_linha) <- CRS("+proj=longlat +datum=WGS84")
+        # projection(pontos_linha) <- CRS("+proj=longlat +datum=WGS84")
         
         plot(pontos_linha, col = 'red', lwd = 2, lty = 2, add = T)
         plot(resul2_shape.temp, cex = 1.5, pch = 'o', add = T)
@@ -924,7 +930,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           x <- unique(rownames(tempo.temp2))
           if(length(anc) == 1){
             if(sobrepo == TRUE){
-              legend(x = extent(shape_file)[2] - 30, y = extent(shape_file)[4], legend = x,
+              legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                  pch = 'o', title = paste0(c('Adding descendents from node',
                    nodes, '...'), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
 
@@ -936,7 +942,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
             }
           } else if(length(anc) > 1){
             if(sobrepo == TRUE){
-              legend(x = extent(shape_file)[2] - 30, y = extent(shape_file)[4], legend = x,
+              legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                     pch = 'o', title = paste0(c('Adding descendents from nodes',
                     nodes, '...'), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
 
@@ -957,7 +963,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
                   unique(rownames(tempo.temp2)))[c(1:2)])  # tabela com todas as células
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
         writeRaster(linhasRaster, "out/presence_mst_mintreeall_ancterminal.tif",
-                    format = "GTiff", overwrite = TRUE)
+         overwrite = TRUE)
         # plot(linhasRaster, axes = FALSE, legend = FALSE, add = TRUE, col = cols1[1],
         #     alpha = transp)
         
@@ -1026,83 +1032,81 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
       }
       
       # first, to internal nodes...
-      # lista_r <- list()
+      lista_r <- list()
       conta <- 0
       
-      tempoo <- tempo.n[, 1:2]
-      
-      #### shapefile ###
-      tempo.d <- as.data.frame(tempoo)
-      tempo_shape <- lats2Shape(lats = tempo.d)
-      # dir.create('out/')
-      write.shapefile(tempo_shape, paste0(c('out/pointshape_node', nodes), collapse = ''))
-      resul1_shape <- vect(paste(c('out/pointshape_node', nodes, '.shp'),
-                                 collapse = ''), crs = "+proj=longlat +datum=WGS84")
-      # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
-      # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-      # suppressWarnings(projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84"))
-      
-      ##### MST based on geographic distance #####
-      # rownames(resul1_shape@coords) <- rownames(tempo.d)
-      # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
-      dista <- earth.dist(lats = as(resul1_shape, 'Spatial'))
-      mst2 <- dino.mst(dista)
-      rownames(mst2) <- rownames(tempo.d)
-      colnames(mst2) <- rownames(tempo.d)
-      lats <- cbind(resul1_shape$LONG,
-                    resul1_shape$LAT)
-      rownames(lats) <- rownames(tempo.d)
-      colnames(lats) <- c('longitude', 'latitude')
-      mst_shape <- msn2Shape(msn = mst2, lats = lats, dist = NULL)
-      write.shapefile(mst_shape, paste0(c('out/mst_node_', nodes), collapse = ''))
-      
-      if(!is.null(tree)){
-        print(paste0(c(conta + 5, ') calculating mst... Done'), collapse = ''))
-        contass <- conta + 5
-      } else {
-        print(paste0(c(conta + 4, ') calculating mst... Done'), collapse = ''))
-        contass <- conta + 4
-      }
-      
-      # plotting shapes
-      pontos_linha <- vect(paste0(c('out/mst_node_', nodes, '.shp'), collapse = ''),
-                           crs = "+proj=longlat +datum=WGS84")
-      # proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
-      plot(pontos_linha, col = 'red', lwd = 3, lty = 2, add = T)
-      plot(resul1_shape, cex = 1.1, pch = 21, bg = cols1[5], add = T)
-      
-      # labels:
-      for(j in 1:length(nodes)){
-        text(tempo.n[which(tempo.n [, 3] == j), c(1, 2)],
-             labels = rep(nodes[j], dim(tempo.n[which(tempo.n [, 3] == j), c(1, 2)])[1]),
-             cex = 0.6, pos = 1, col = 'black')
-      }
-      
-      # minimum convex polygon
-      if(pol == TRUE){
-        conv <- convexhull.xy(tempoo)
-        plot(conv, add = T, col = adjustcolor(cols1[j], transp))
-        write.shapefile(conv, paste0(c('out/mcp_node_', nodes), collapse = ''))
-      }              
-      
-      # back-transforming lines in points:
-      suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
-      
-      lista_r <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
-      writeRaster(lista_r, paste0(c("out/presence_mst_", nodes, ".tif"), 
-                                  collapse = ''), overwrite = TRUE)
-      
-      plot(lista_r, axes = FALSE, legend = FALSE, add = TRUE,
-           col = cols1[5], alpha = transp)
-      
-      # presence-absence matrix:
-      # preparing the matrix
-      for(k in unique(rownames(tempo.n))){
+      for(j in unique(rownames(tempo.n))){
+        conta <- conta + 1
+        tempoo <- subset(tempo.n[, 1:2], rownames(tempo.n) == j)
+        
+        #### shapefile ###
+        tempo.d <- as.data.frame(tempoo)
+        tempo_shape <- lats2Shape(lats = tempo.d)
+        # dir.create('out/')
+        write.shapefile(tempo_shape, paste0(c('out/pointshape_', j), collapse = ''))
+        resul1_shape <- vect(paste0(c('out/pointshape_', j, '.shp'),
+                              collapse = ''),
+                    crs = "+proj=longlat +datum=WGS84")
+        # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
+        # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+        # suppressWarnings(projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84"))
+        
+        ##### MST based on geographic distance #####
+        # rownames(resul1_shape@coords) <- rownames(tempo.d)
+        # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
+        dista <- earth.dist(lats = as(resul1_shape, 'Spatial'))
+        mst2 <- dino.mst(dista)
+        rownames(mst2) <- rownames(tempo.d)
+        colnames(mst2) <- rownames(tempo.d)
+        lats <- cbind(resul1_shape$Long, resul1_shape$Lat)
+        rownames(lats) <- rownames(tempo.d)
+        colnames(lats) <- c('longitude', 'latitude')
+        mst_shape <- msn2Shape(msn = mst2, lats = lats)
+        write.shapefile(mst_shape, paste0(c('out/mst_', j), collapse = ''))
+        
+        if(!is.null(tree)){
+          print(paste0(c(conta + 5, ') calculating mst... Done'), collapse = ''))
+          contass <- conta + 5
+        } else {
+          print(paste0(c(conta + 4, ') calculating mst... Done'), collapse = ''))
+          contass <- conta + 4
+        }
+        
+        # plotting shapes
+        pontos_linha <- shapefile(paste0(c('out/mst_', j, '.shp'), collapse = ''),
+                                  warnPRJ = FALSE)
+        proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
+        plot(pontos_linha, col = 'red', lwd = 3, lty = 2, add = T)
+        plot(resul1_shape, cex = 1.1, pch = 21, bg = cols1[j], add = T)
+        
+        # labels:
+        text(resul1_shape, labels = rep(nodes[unique(tempo.n[which(rownames(tempo.n) == j), 3])],
+                          dim(tempoo)[1]), cex = 0.6, pos = 1, col = 'black')
+        
+        # minimum convex polygon
+        if(pol == TRUE){
+          conv <- convexhull.xy(tempoo)
+          plot(conv, add = T, col = adjustcolor(cols1[j], transp))
+          write.shapefile(conv, paste0(c('out/mcp_', j), collapse = ''))
+        }              
+              
+        # back-transforming lines in points:
+        suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
+                
+        lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
+        writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
+            collapse = ''), overwrite = TRUE)
+
+        plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE,
+             col = cols1[unique(tempo.n[which(rownames(tempo.n) == j), 3])], alpha = transp)
+              
+        # presence-absence matrix:
+        # preparing the matrix
         for(i in 1:ncellras){
-          if(is.na(r[i]) == FALSE && is.na(lista_r[i]) == FALSE){
-            coor.l[i, k] <- 1
-          } else if(is.na(r[i]) == FALSE && is.na(lista_r[i]) == TRUE){
-            coor.l[i, k] <- 0
+          if(is.na(r[i]) == FALSE && is.na(lista_r[[conta]][i]) == FALSE){
+            coor.l[i, conta] <- 1
+          } else if(is.na(r[i]) == FALSE && is.na(lista_r[[conta]][i]) == TRUE){
+            coor.l[i, conta] <- 0
           }
         }
       }
@@ -1121,21 +1125,20 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           tempo_shape <- lats2Shape(lats = tempo.d)
           # dir.create('temp/')
           write.shapefile(tempo_shape, paste0(c('out/pointshape_', j), collapse = ''))
-          resul1_shape <- rgdal::readOGR(dsn = paste0(c('out/pointshape_', j, '.shp'),
-                                            collapse = ''), verbose = FALSE)
+          resul1_shape <- vect(paste0(c('out/pointshape_', j, '.shp'),
+                            collapse = ''), crs = "+proj=longlat +datum=WGS84")
           # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
-          proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-          projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
+          # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+          # projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
           
           ##### MST based on geographic distance #####
           # rownames(resul1_shape@coords) <- rownames(tempo.d)
           # colnames(resul1_shape@coords) <- c('longitude', 'latitude')
-          dista <- earth.dist(lats = resul1_shape)
+          dista <- earth.dist(lats = as(resul1_shape, 'Spatial'))
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
-          lats <- cbind(resul1_shape$LONG,
-              resul1_shape$LAT)
+          lats <- cbind(resul1_shape$Long, resul1_shape$Lat)
           rownames(lats) <- rownames(tempo.d)
           colnames(lats) <- c('longitude', 'latitude')
           mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -1163,7 +1166,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           }              
                 
           # back-transforming lines in points:
-          pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular')
+          suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
                   
           lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
@@ -1192,7 +1195,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           xxx <- unique(tempo.n[,3])
           if(length(anc) == 1){
             if(sobrepo == TRUE){
-              legend(x = extent(shape_file)[2] - 30, y = extent(shape_file)[4], legend = x,
+              legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                      pch = 19, col = cols1[x], title = paste0(c('Adding descendents from the node',
                    nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'bottomright', legend = xx,
@@ -1213,7 +1216,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
             }
           } else if(length(anc) > 1){
             if(sobrepo == TRUE){
-              legend(x = extent(shape_file)[2] - 30, y = extent(shape_file)[4], legend = x,
+              legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                      pch = 19, col = cols1[x], title = paste0(c('Adding descendents from the nodes',
                    nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'bottomright', legend = xx,
@@ -1239,7 +1242,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           xxx <- unique(tempo.n[,3])
           if(length(anc) == 1){
             if(sobrepo == TRUE){
-              legend(x = extent(shape_file)[2] - 30, y = extent(shape_file)[4], legend = x,
+              legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                   pch = 19, col = cols1[x], title = paste0(c('Adding descendents from the node',
                   nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'topright', legend = nodes, pch = 15, col = cols1[xxx], title = 'Adding the node(s)...', title.col = 'blue',
@@ -1254,7 +1257,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
             }
           } else if(length(anc) > 1){
             if(sobrepo == TRUE){
-              legend(x = extent(shape_file)[2] - 30, y = extent(shape_file)[4], legend = x,
+              legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                  pch = 19, col = cols1[x], title = paste0(c('Adding descendents from the nodes',
                    nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'topright', legend = nodes, pch = 15, col = cols1[xxx], title = 'Adding the node(s)...', title.col = 'blue',
