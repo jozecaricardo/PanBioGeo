@@ -29,7 +29,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   }
   
   if(sobrepo == FALSE){
-    layout(1, 1, 1)
+    # layout(1, 1, 1)
     plot(shape_file, type = 'n', xlim = c(xmin, xmax), ylim = c(ymin, ymax))
     # dev.off()
   }
@@ -250,7 +250,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         resul1_shape <- vect('out/pointsshape_mintreeall.shp',
          crs = "+proj=longlat +datum=WGS84")
         # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-        # projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
+        terra::project(resul1_shape, "+proj=longlat +datum=WGS84")
         
         
         ##### MST based on geographic distance #####
@@ -462,7 +462,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         resul1_shape <- vect('out/pointsshape_mintreeall.shp',
          crs = "+proj=longlat +datum=WGS84")
         # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
-        # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+        terra::project(resul1_shape, "+proj=longlat +datum=WGS84") # datum WGS84
         
         ##### MST based on geographic distance #####
         # rownames(resul1_shape@coords) <- rownames(tempo.d)
@@ -553,7 +553,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
                       collapse = ''), crs = "+proj=longlat +datum=WGS84")
           # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
           # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-          
+          terra::project(resul1_shape, "+proj=longlat +datum=WGS84")
           # resul1_shape <- vect(resul1_shape, crs = "+proj=longlat")
           
           ##### MST based on geographic distance #####
@@ -758,7 +758,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         resul1_shape <- vect('out/ancterminal_points_mintreeall.shp',
          crs = "+proj=longlat +datum=WGS84")
         # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-        # projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
+        terra::project(resul1_shape, "+proj=longlat +datum=WGS84")
         
         #only terminals:
         tempo_temp.d <- as.data.frame(tempo.temp)
@@ -766,6 +766,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         write.shapefile(tempo_shape.temp, 'out/points_mintreeall_onlyterminal')
         resul1_shape.temp <- vect('out/points_mintreeall_onlyterminal.shp',
           crs = "+proj=longlat +datum=WGS84")
+        terra::project(resul1_shape.temp, "+proj=longlat +datum=WGS84")
         # proj4string(resul1_shape.temp) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         # projection(resul1_shape.temp) <- CRS("+proj=longlat +datum=WGS84")
       }
@@ -776,6 +777,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
       write.shapefile(tempo_shape.temp, 'out/points_mintreeall_onlyinternal')
       resul2_shape.temp <- vect('out/points_mintreeall_onlyinternal.shp',
        crs = "+proj=longlat +datum=WGS84")
+      terra::project(resul2_shape.temp, "+proj=longlat +datum=WGS84")
       # proj4string(resul2_shape.temp) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
       # projection(resul2_shape.temp) <- CRS("+proj=longlat +datum=WGS84")
       
@@ -805,6 +807,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         pontos_linha <- shapefile('out/mst_ancterminal_mintreeall.shp', warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
         crs(pontos_linha) <- "+proj=longlat +datum=WGS84"
+        terra::project(pontos_linha, "+proj=longlat +datum=WGS84")
         
         plot(pontos_linha, col = 'red', lwd = 3, lty = 2, add = T)
         plot(resul2_shape.temp, cex = 1.5, pch = 'o', add = T)
@@ -874,7 +877,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
                   unique(rownames(tempo)))[c(1:2)])  # tabela com todas as células
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
         writeRaster(linhasRaster, "out/presence_mst_mintreeall_ancterminal.tif",
-                    format = "GTiff", overwrite = TRUE)
+         overwrite = TRUE)
         # plot(linhasRaster, axes = FALSE, legend = FALSE, add = TRUE, col = cols1[1],
         #     alpha = transp)
         
@@ -894,8 +897,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo_temp.d2)
         colnames(mst2) <- rownames(tempo_temp.d2)
-        lats <- cbind(resul2_shape.temp$Long,
-                resul2_shape.temp$Lat)
+        lats <- cbind(resul2_shape.temp$long,
+                resul2_shape.temp$lat)
         rownames(lats) <- rownames(tempo_temp.d2)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -911,6 +914,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         pontos_linha <- shapefile('out/mst_mintreeall_onlyinternal.shp', warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
         crs(pontos_linha) <- "+proj=longlat +datum=WGS84"
+        terra::project(pontos_linha, "+proj=longlat +datum=WGS84")
         
         plot(pontos_linha, col = 'red', lwd = 2, lty = 2, add = T)
         plot(resul2_shape.temp, cex = 1.5, pch = 'o', add = T)
@@ -958,7 +962,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         }
 
         # back-transforming lines in points:
-        pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular')
+        suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
         
         # presence-absence matrix:
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo.temp2))), dimnames = list(seq(1:ncellras),
@@ -1051,7 +1055,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
                     crs = "+proj=longlat +datum=WGS84")
         # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
         # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-        # suppressWarnings(projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84"))
+        terra::project(resul1_shape, "+proj=longlat +datum=WGS84")
         
         ##### MST based on geographic distance #####
         # rownames(resul1_shape@coords) <- rownames(tempo.d)
@@ -1131,7 +1135,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
                             collapse = ''), crs = "+proj=longlat +datum=WGS84")
           # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
           # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-          # projection(resul1_shape) <- CRS("+proj=longlat +datum=WGS84")
+          terra::project(resul1_shape, "+proj=longlat +datum=WGS84")
           
           ##### MST based on geographic distance #####
           # rownames(resul1_shape@coords) <- rownames(tempo.d)
