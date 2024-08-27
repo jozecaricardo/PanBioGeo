@@ -277,7 +277,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # plotting shapes
         pontos_linha <- shapefile('out/mst_mintreeall.shp', warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
-        # projection(pontos_linha) <- CRS("+proj=longlat +datum=WGS84")
+        crs(pontos_linha) <- "+proj=longlat +datum=WGS84"
         
         plot(pontos_linha, col = cols1[1], lwd = 3, add = T)
         plot(resul1_shape, cex = 1.1, pch = 21, bg = cols1[1:length(taxon)], add = T)
@@ -804,7 +804,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # plotting shapes
         pontos_linha <- shapefile('out/mst_ancterminal_mintreeall.shp', warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
-        # projection(pontos_linha) <- CRS("+proj=longlat +datum=WGS84")
+        crs(pontos_linha) <- "+proj=longlat +datum=WGS84"
         
         plot(pontos_linha, col = 'red', lwd = 3, lty = 2, add = T)
         plot(resul2_shape.temp, cex = 1.5, pch = 'o', add = T)
@@ -910,7 +910,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # plotting shapes
         pontos_linha <- shapefile('out/mst_mintreeall_onlyinternal.shp', warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
-        # projection(pontos_linha) <- CRS("+proj=longlat +datum=WGS84")
+        crs(pontos_linha) <- "+proj=longlat +datum=WGS84"
         
         plot(pontos_linha, col = 'red', lwd = 2, lty = 2, add = T)
         plot(resul2_shape.temp, cex = 1.5, pch = 'o', add = T)
