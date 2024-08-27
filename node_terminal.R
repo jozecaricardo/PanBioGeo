@@ -48,9 +48,9 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
 
   #- R graphs:
   par(pty = 's')
-  if(seephylog == TRUE){
-    layout(1:2, 1, 2)
-  }
+  # if(seephylog == TRUE){
+  #   layout(1:2, 1, 2)
+  # }
   if(seeres == TRUE){
     layout(matrix(1, nr = 1, nc = 1, byrow = F))
   }
@@ -87,11 +87,13 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   }
   
   if(seephylog == TRUE){
-    obj2 <- phylo.to.map(tree, coordin[,2:1], database = shape_file, plot = F, rotate = F)
+    obj2 <- phylo.to.map(tree = tree, coords = coordin[,2:1],
+     database = as(shape_file, 'Spatial'), plot = F, rotate = F)
     plot(obj2, colors = cols1, ftype = 'i', fsize = 0.6, cex.points = c(0.7, 1.2), pts = F,
          direction = "rightwards")
-    labelnodes(1:(Ntip(tree) + tree$Nnode), 1:(Ntip(tree) + tree$Nnode), interactive = F, cex = .6)
-    mtext('Phylogeny on the map', side = 3, line = 1)
+    labelnodes(1:(Ntip(tree) + tree$Nnode), 1:(Ntip(tree) + tree$Nnode),
+     interactive = F, cex = .6, circle.exp = 0.4)
+    mtext('Phylogeny on the map', side = 3, line = -5)
   }
   
   if(!is.null(tree)){
@@ -160,21 +162,21 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         plot(shape_file, axes = TRUE, sub = paste0(c('resolution: ', resol[1],
                     ' x ', resol[2]), collapse = ''), xlim = c(xmin, xmax), ylim = c(ymin, ymax))
         abline(h = 0, col = 'red', lty = 2) # equator
-        mtext('Minimum spanning trees of the terminal nodes', side = 3, line = 1)
+        mtext('Minimum spanning trees of the terminal nodes', side = 3, line = 2)
       } else if(!is.null(nodes)){
         if(length(nodes) == 1){
           plot(shape_file, axes = TRUE, sub = paste0(c('resolution: ', resol[1], ' x ', resol[2]),
                   collapse = ''), cex.main = 0.7, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
           abline(h = 0, col = 'red', lty = 2) # equator
           mtext(paste0(c('Mapping a minimum spanning tree of the internal node:',
-                       nodes), collapse = ' '), side = 3, line = 1)
+                       nodes), collapse = ' '), side = 3, line = 2)
         } else if(length(nodes) > 1){
           plot(shape_file, axes = TRUE, sub = paste0(c('resolution: ',
                 resol[1], ' x ', resol[2]), collapse = ''), cex.main = 0.7,
                xlim = c(xmin, xmax), ylim = c(ymin, ymax))
           abline(h = 0, col = 'red', lty = 2) # equator
           mtext(paste0(c('Mapping a minimum spanning tree of the internal nodes:',
-                              nodes), collapse = ' '), side = 3, line = 1)
+                              nodes), collapse = ' '), side = 3, line = 2)
         }
       }
     } else {
@@ -258,8 +260,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
-        lats <- cbind(resul1_shape$Long,
-              resul1_shape$Lat)
+        lats <- cbind(resul1_shape$long,
+              resul1_shape$lat)
         rownames(lats) <- rownames(tempo.d)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -359,8 +361,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
-          lats <- cbind(resul1_shape$Long,
-              resul1_shape$Lat)
+          lats <- cbind(resul1_shape$long,
+              resul1_shape$lat)
           rownames(lats) <- rownames(tempo.d)
           colnames(lats) <- c('longitude', 'latitude')
           mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -469,8 +471,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
-        lats <- cbind(resul1_shape$Long,
-              resul1_shape$Lat)
+        lats <- cbind(resul1_shape$long,
+              resul1_shape$lat)
         rownames(lats) <- rownames(tempo.d)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -561,8 +563,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
-          lats <- cbind(resul1_shape$Long,
-              resul1_shape$Lat)
+          lats <- cbind(resul1_shape$long,
+              resul1_shape$lat)
           rownames(lats) <- rownames(tempo.d)
           colnames(lats) <- c('longitude', 'latitude')
           mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -785,8 +787,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
-        lats <- cbind(resul1_shape$Long,
-              resul1_shape$Lat)
+        lats <- cbind(resul1_shape$long,
+              resul1_shape$lat)
         rownames(lats) <- rownames(tempo.d)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -1058,7 +1060,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         mst2 <- dino.mst(dista)
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
-        lats <- cbind(resul1_shape$Long, resul1_shape$Lat)
+        lats <- cbind(resul1_shape$long, resul1_shape$lat)
         rownames(lats) <- rownames(tempo.d)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -1138,7 +1140,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           mst2 <- dino.mst(dista)
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
-          lats <- cbind(resul1_shape$Long, resul1_shape$Lat)
+          lats <- cbind(resul1_shape$long, resul1_shape$lat)
           rownames(lats) <- rownames(tempo.d)
           colnames(lats) <- c('longitude', 'latitude')
           mst_shape <- msn2Shape(msn = mst2, lats = lats)
