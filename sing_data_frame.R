@@ -1,4 +1,5 @@
 ### Function to eliminate singletons and return a data frame object ###
+# Please: spp, lat, and long!
 singleton.to.data.frame <- function(data = NULL, phylogeny = NULL){
 	lat <- data[,2]
 	long <- data[,3]
@@ -13,6 +14,12 @@ singleton.to.data.frame <- function(data = NULL, phylogeny = NULL){
 	sppsORD <- sort(rownames(locais), decreasing = F)
 	for(i in 1:length(unique(rownames(locais)))){
   		singletons[i] <- length(grep(pattern = unique(sppsORD)[i], x = sppsORD))
+	}
+
+	if(all(singletons > 1) == T){
+		return(list(data_df = data, treeMod = phylogeny))
+		stop('The dataset is OK. No modifications were needed!/n
+			Please check the names of columns: they must to be long and lat!')
 	}
 
 	singletons <- which(singletons == 1)

@@ -20,7 +20,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   print('1) loading functions...')
   library(geiger); library(devtools)
   library(phytools)
-  library(maptools); library(letsR); library(fossil)
+  library(letsR); library(fossil)  # Package ‘maptools’ was removed from the CRAN repository.
   library(viridis); library(mapdata); library(vegan); library(spdep)
   library(dismo); library(spatstat); library(terra)
   
@@ -47,7 +47,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
 
 
   #- R graphs:
-  par(pty = 's')
+  # par(pty = 's')
   # if(seephylog == TRUE){
   #   layout(1:2, 1, 2)
   # }
@@ -139,6 +139,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
     }
     map.r <- as.data.frame(rasterToPoints(r))
     pontosRaster <- rasterize(cbind(map.r$x, map.r$y), r, field = 1)
+    proj4string(pontosRaster) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84(pontosRaster) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
     # plot(pontosRaster, add = T)
     map.r$gridNumber <- which(pontosRaster@data@values == 1)
     text(map.r[,c(1, 2)], labels = map.r$gridNumber, cex = 0.8,
@@ -149,7 +150,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   mask.raster <- raster(extent(as(shape_file, 'Spatial')), resolution = resol,
                         crs = CRS("+proj=longlat +datum=WGS84"))
   r <- rasterize(as(shape_file, 'Spatial'), mask.raster)
-  proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
+  proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
   # mask.raster[is.na(mask.raster)] <- 0
   r <- merge(r, mask.raster)
   ncellras <- ncell(r)
@@ -286,7 +287,10 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         if(pol == TRUE){
           conv <- convexhull.xy(tempo)
           plot(conv, add = T, col = adjustcolor(cols1[taxon[1]], transp))
-          write.shapefile(conv, 'out/mcp_mintreeall')
+          conv <- st_as_sf(conv)
+          conv <- as_Spatial(conv)
+          conv <- vect(conv, crs = "+proj=longlat +datum=WGS84")
+          writeVector(conv, 'out/mcp_mintreeall', overwrite = T)
         }
         
         # legend
@@ -309,6 +313,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         coor.l <- matrix(NA, nr = ncellras, nc = length(taxon), dimnames = list(seq(1:ncellras),
                       unique(rownames(tempo))[c(1:length(taxon))]))  # tabela com todas as células
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
+        proj4string(linhasRaster) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
 
         writeRaster(linhasRaster, "out/presence_mintreeall.tif",
                     overwrite = TRUE)
@@ -385,7 +390,10 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           # minimum convex polygon
           if(pol == TRUE){
             conv <- convexhull.xy(tempo)
-            write.shapefile(conv, paste0(c('out/mcp_', j), collapse = ''))
+            conv <- st_as_sf(conv)
+            conv <- as_Spatial(conv)
+            conv <- vect(conv, crs = '+proj=longlat +datum=WGS84')
+            writeVector(conv, paste0(c('out/mcp_', j), collapse = ''), overwrite = T)
             plot(conv, add = T, col = adjustcolor(cols1[j], transp))
           }
           
@@ -399,7 +407,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
           
           
-          lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
+          lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças   
+          proj4string(lista_r[[conta]]) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
             collapse = ''), overwrite = TRUE)
           plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE,
@@ -494,7 +503,10 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         if(pol == TRUE){
           conv <- convexhull.xy(tempo)
           plot(conv, add = T, col = adjustcolor(cols1[unique(rownames(tempo))[1]], transp))
-          write.shapefile(conv, 'out/mcp_mintreeall')
+          conv <- st_as_sf(conv)
+          conv <- as_Spatial(conv)
+          conv <- vect(conv, crs = '+proj=longlat +datum=WGS84')
+          writeVector(conv, 'out/mcp_mintreeall', overwrite = T)
         }
         
         # legend
@@ -512,6 +524,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo))), dimnames = list(seq(1:ncellras),
                       unique(rownames(tempo)))[c(1:2)])
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
+        proj4string(linhasRaster) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84 
         writeRaster(linhasRaster, "out/presence_mintreeall.tif",
                     overwrite = TRUE)
         plot(linhasRaster, axes = FALSE, legend = FALSE, add = TRUE, col = cols1[1], alpha = transp)
@@ -601,6 +614,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           
           
           lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
+          proj4string(lista_r[[conta]]) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84   
           plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE, col = cols1[j],
                alpha = transp)
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
@@ -692,10 +706,12 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
       qde_sp <- 0
       for(b in species){qde_sp[b] <- length(which(rownames(coordin) == b))}
       qde_sp <- cumsum(qde_sp)
-      tab_sp <- matrix(NA, nrow = dim(coordin), nc = 3)
+      tab_sp <- matrix(NA, nrow = dim(coordin), nc = 4)
+      no_num <- 0
       #######
 
       for(z in taxon){
+        no_num <- no_num + 1
         # sppp <- which(unique(rownames(coordin)) == taxon[j])
         
         ##### Se quisermos fazer MST de todos os espécimes JUNTOS das espécies escolhidas... 
@@ -703,6 +719,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         tab_sp[(qde_sp[idx - 1] + 1) : qde_sp[idx], 2] <- coordin[which(rownames(coordin) == z), 1]
         tab_sp[(qde_sp[idx - 1] + 1) : qde_sp[idx], 3] <- coordin[which(rownames(coordin) == z), 2]
         tab_sp[(qde_sp[idx - 1] + 1) : qde_sp[idx], 1] <- rep(z, (qde_sp[idx] - qde_sp[idx - 1]))
+        tab_sp[(qde_sp[idx - 1] + 1) : qde_sp[idx], 4] <- rep(no_num, (qde_sp[idx] - qde_sp[idx - 1]))
       }
       tabela <- tabela
     } else if(is.null(taxon)){
@@ -807,7 +824,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         pontos_linha <- shapefile('out/mst_ancterminal_mintreeall.shp', warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
         crs(pontos_linha) <- "+proj=longlat +datum=WGS84"
-        terra::project(pontos_linha, "+proj=longlat +datum=WGS84")
+        # terra::project(pontos_linha, "+proj=longlat +datum=WGS84")
         
         plot(pontos_linha, col = 'red', lwd = 3, lty = 2, add = T)
         plot(resul2_shape.temp, cex = 1.5, pch = 'o', add = T)
@@ -827,7 +844,10 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         if(pol == TRUE){
           conv <- convexhull.xy(tempo)
           plot(conv, add = T, col = adjustcolor('gray', transp))
-          write.shapefile(conv, 'out/mcp_mintreeall_ancterminal')
+          conv <- st_as_sf(conv)
+          conv <- as_Spatial(conv)
+          conv <- vect(conv, crs = '+proj=longlat +datum=WGS84')
+          writeVector(conv, 'out/mcp_mintreeall_ancterminal', overwrite = T)
         }
         
         # legend
@@ -876,6 +896,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo))), dimnames = list(seq(1:ncellras),
                   unique(rownames(tempo)))[c(1:2)])  # tabela com todas as células
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
+        proj4string(linhasRaster) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84    
         writeRaster(linhasRaster, "out/presence_mst_mintreeall_ancterminal.tif",
          overwrite = TRUE)
         # plot(linhasRaster, axes = FALSE, legend = FALSE, add = TRUE, col = cols1[1],
@@ -914,7 +935,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         pontos_linha <- shapefile('out/mst_mintreeall_onlyinternal.shp', warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
         crs(pontos_linha) <- "+proj=longlat +datum=WGS84"
-        terra::project(pontos_linha, "+proj=longlat +datum=WGS84")
+        # terra::project(pontos_linha, "+proj=longlat +datum=WGS84")
         
         plot(pontos_linha, col = 'red', lwd = 2, lty = 2, add = T)
         plot(resul2_shape.temp, cex = 1.5, pch = 'o', add = T)
@@ -927,7 +948,10 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         if(pol == TRUE){
           conv <- convexhull.xy(tempo_temp.d2)
           plot(conv, add = T, col = adjustcolor('gray', transp))
-          write.shapefile(conv, 'out/mcp_mintreeall_ancterminal')
+          conv <- st_as_sf(conv)
+          conv <- as_Spatial(conv)
+          conv <- vect(conv, crs = '+proj=longlat +datum=WGS84')
+          writeVector(conv, 'out/mcp_mintreeall_ancterminal', overwrite = T)
         }
 
 
@@ -968,6 +992,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo.temp2))), dimnames = list(seq(1:ncellras),
                   unique(rownames(tempo.temp2)))[c(1:2)])  # tabela com todas as células
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
+        proj4string(linhasRaster) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         writeRaster(linhasRaster, "out/presence_mst_mintreeall_ancterminal.tif",
          overwrite = TRUE)
         # plot(linhasRaster, axes = FALSE, legend = FALSE, add = TRUE, col = cols1[1],
@@ -1082,6 +1107,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         pontos_linha <- shapefile(paste0(c('out/mst_', j, '.shp'), collapse = ''),
                                   warnPRJ = FALSE)
         proj4string(pontos_linha) <- CRS("+proj=longlat +datum=WGS84") # wgs84 datum
+        crs(pontos_linha) <- "+proj=longlat +datum=WGS84"
         plot(pontos_linha, col = 'red', lwd = 3, lty = 2, add = T)
         plot(resul1_shape, cex = 1.1, pch = 21, bg = cols1[j], add = T)
         
@@ -1092,14 +1118,18 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # minimum convex polygon
         if(pol == TRUE){
           conv <- convexhull.xy(tempoo)
+          conv <- st_as_sf(conv)
+          conv <- as_Spatial(conv)
+          conv <- vect(conv, crs = "+proj=longlat +datum=WGS84")
           plot(conv, add = T, col = adjustcolor(cols1[j], transp))
-          write.shapefile(conv, paste0(c('out/mcp_', j), collapse = ''))
+          writeVector(conv, paste0(c('out/mcp_', j), collapse = ''), overwrite = T)
         }              
               
         # back-transforming lines in points:
         suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
                 
         lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
+        proj4string(lista_r[[conta]]) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
             collapse = ''), overwrite = TRUE)
 
@@ -1168,13 +1198,17 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           if(pol == TRUE){
             conv <- convexhull.xy(tempoo)
             plot(conv, add = T, col = adjustcolor(cols1[j], transp))
-            write.shapefile(conv, paste0(c('out/mcp_', j), collapse = ''))
+            conv <- st_as_sf(conv)
+            conv <- as_Spatial(conv)
+            conv <- vect(conv, crs = "+proj=longlat +datum=WGS84")
+            writeVector(conv, paste0(c('out/mcp_', j), collapse = ''), overwrite = T)
           }              
                 
           # back-transforming lines in points:
           suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
                   
           lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
+          proj4string(lista_r[[conta]]) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
             collapse = ''), overwrite = TRUE)
           

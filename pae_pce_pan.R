@@ -33,7 +33,7 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
   riVec <- rep(1.0, colu)
   
   
-  contagem <- 0
+  # contagem <- 0
   
   lista <- list()
   listaR <- list()
@@ -51,21 +51,23 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
   
   ######################
   ##### shape file #####
+  shapeFile <- as(shapeFile, 'Spatial')
   grid <- raster(extent(shapeFile), resolution = resolut, crs = CRS("+proj=longlat +datum=WGS84"))
   grid <- raster::extend(grid, c(1, 1))
   gridPolygon <- rasterToPolygons(grid)
-  suppressWarnings(proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")) # datum WGS84
+  crs(gridPolygon) <- "+proj=longlat +datum=WGS84" # datum WGS84
   #proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
   # projection(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")
   
   
   # clipping the intersected cells:
-  suppressWarnings(cropped_map <- raster::intersect(gridPolygon, shapeFile))
+  cropped_map <- raster::intersect(gridPolygon, shapeFile)
   
   # producing a raster of the shapefile
   mask.raster <- raster(extent(shapeFile), resolution = resolut,
                         crs = CRS("+proj=longlat +datum=WGS84"))
-  suppressWarnings(r <- rasterize(shapeFile, mask.raster))
+  # suppressWarnings(r <- rasterize(shapeFile, mask.raster))
+  r <- rasterize(shapeFile, mask.raster)
   proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
   # mask.raster[is.na(mask.raster)] <- 0
   r <- merge(r, mask.raster)
@@ -95,10 +97,12 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
   ####### Detecting those grids being supported by synapomorphies ########
   
   #---------------------------------- #### PAE-PCE ###
-  
+  # matTemp <- list()
+  contagem <- 1
+  conta <- 0
+
   while(length(which((ciVec == 1) == TRUE)) > 1 && dim(preabsMat)[2] > 1){
-    contagem <- contagem + 1
-    
+      
     # We can get a random starting tree for a parsimony search using the
     #  random.addition function:
     # ra.tre <- njs(dist.hamming(tempMatrix))
@@ -203,6 +207,11 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
     # inter3 <- which(riVec > 0)
     # interT1 <- inter1
     interT1 <- intersect(inter1, inter2)
+
+    if(length(interT1) == 0 && contagem == 1){
+      plot(cropped_map, add = TRUE)
+      stop('This analysis has no indicative of generalized tracks!')
+    }
     
     if(length(interT1) < 2){
       print('This analysis had to be stopped because there is no more synapomorphies!')
@@ -419,6 +428,9 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
     
     # tabela <- as.data.frame(tabela)
     
+    if(dim(tabelaT)[1] == 0){
+      stop('No more iterations are needed.')
+    }
     # data frame with the results...
     frameTempT <- data.frame(spp = tabelaT[, 1], grid_n = tabelaT[, 2], row.names = 1:dim(tabelaT)[1])
     # frameTemp
@@ -463,7 +475,7 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
         plot(r, axes = FALSE, legend = FALSE, add = TRUE, col = colores[contagem],
              alpha = 0.60)
       } else if(sobrepo == FALSE){
-        plot(r, axes = FALSE, legend = FALSE, add = TRUE, col = colores[contagem],
+        plot(r, axes = FALSE, legend = FALSE, add = TRUE, col = colores[1],
              alpha = 0.50)
       }
     
@@ -472,8 +484,9 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
       #convert the raster to points for plotting the number of a grid
       map.r <- as.data.frame(rasterToPoints(r))
       pontosRaster <- rasterize(cbind(map.r$x, map.r$y), r, field = 1) # raster com as presenças
-      suppressWarnings(writeRaster(pontosRaster, paste0(c('out/generalizedTrack_', contagem, '.tif'), collapse = ''),
-                                   format = "GTiff", overwrite = TRUE))
+      proj4string(pontosRaster) <- CRS("+proj=longlat +datum=WGS84")
+      writeRaster(pontosRaster, paste0(c('out/generalizedTrack_', contagem, '.tif'), collapse = ''),
+                      overwrite = TRUE)
       
       
       ## nota: gridPolygon@data has all polygons established with a specific resolution
@@ -484,7 +497,7 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
         map.r$gridNumber <- which(pontosRaster@data@values == 1)
         
         if(labelGrid == TRUE){
-          text(map.r[,c(1, 2)], labels = map.r$gridNumber, cex = (2.5 * resolut[1]) / 8, col = 'black', font = 2)
+          text(map.r[,c(1, 2)], labels = map.r$gridNumber, cex = 2.0, col = 'black', font = 2)
         }
       }
       
@@ -493,9 +506,9 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
         #local <- locator()
         logfile <- "out/legendSpeciesA.txt"
         cat(c("grid_number", "species", "\n"), file = logfile, sep="\t")
-        for(i in as.numeric(as.character(speciesNumber$resulPaeRaster))){
-          cat(c(paste0(c('grid_', i), collapse = ''), rownames(subset(resulPaeRaster,
-                                                                      resulPaeRaster[,'grid_n'] == i)), '\n'), sep = '\t', file = logfile, append = TRUE)
+        for(i in as.numeric(as.character(speciesNumberT$resulPaeRasterT))){
+          cat(c(paste0(c('grid_', i), collapse = ''), rownames(subset(resulPaeRasterT,
+                               resulPaeRasterT[,'grid_n'] == i)), '\n'), sep = '\t', file = logfile, append = TRUE)
         }
       }
     }
@@ -527,7 +540,7 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
       if(all(discre == 'absent')){
         quantum <- quantum + 1
         print(paste0(k, 'is outside of map! Please check it!'))
-        next
+        break
       }
       
       discre <- as.factor(discre)  ### vetor de presença da espécie
@@ -561,6 +574,11 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
     }
 
     # tabela <- as.data.frame(tabela)
+
+    if(dim(tabela)[1] == 0){
+      print('No more iterations are needed.')
+      break
+    }
 
     # data frame with the results...
     frameTemp <- data.frame(spp = tabela[, 1], grid_n = tabela[, 2], row.names = 1:dim(tabela)[1])
@@ -596,17 +614,18 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
     preabsMat <- matTemp
     
     print(paste0(c('The iteration number ', contagem, ' has finished.'), collapse = ''))
-    
+
+    contagem <- contagem + 1
+    conta[contagem] <- contagem
   } # close while looping
   
   
-  if(length(colnames(matTemp)) == 0 && contagem == 1){
+  if(length(colnames(matTemp)) == 0 && length(conta) == 1){
     xis <- 1
     plot(cropped_map, add = TRUE)
     stop('This analysis has no indicative of generalized tracks!')
-  } else if(length(colnames(matTemp)) == 0 && contagem > 1){
+  } else if(length(colnames(matTemp)) == 0 && length(conta) > 1){
     xis <- seq(1:length(listaR))
-    stop()
   }
   
   if(is.null(nomesCOL) || dim(as.data.frame(tempMatrix))[1] == 0){
@@ -618,7 +637,7 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
     if(sobrepo == TRUE){
       print('Bold numbers refer to PAE analysis using generalized tracks!')
     }
-    text(map.r[,c(1, 2)], labels = map.r$gridNumber, cex = (2.5 * resolut[1]) / 8, col = 'black', font = 2)
+    text(map.r[,c(1, 2)], labels = map.r$gridNumber, cex = 2.0, col = 'black', font = 2)
   }
   
   conta <- NULL
