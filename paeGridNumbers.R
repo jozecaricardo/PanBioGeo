@@ -15,20 +15,20 @@ paeGridNumbers <- function(shape_file, resol, coordina, gridCell, transp = 0.8, 
   xmin = xmin; xmax = xmax; ymin = ymin; ymax = ymax
   
   
-  grid <- raster(extent(shape_file), resolution = resolut, crs = CRS("+proj=longlat +datum=WGS84"))
+  grid <- raster(extent(as(shape_file, 'Spatial')), resolution = resolut, crs = CRS("+proj=longlat +datum=WGS84"))
   grid <- raster::extend(grid, c(1, 1))
   gridPolygon <- rasterToPolygons(grid)
   # suppressWarnings(proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")) # datum WGS84
   #proj4string(gridPolygon) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-  projection(gridPolygon) <- CRS("+proj=longlat +datum=WGS84")
+  crs(gridPolygon) <- "+proj=longlat +datum=WGS84"
   
   
   # clipping the intersected cells:
-  cropped_map <- raster::intersect(gridPolygon, shape_file)
+  cropped_map <- raster::intersect(gridPolygon, as(shape_file, 'Spatial'))
   # plot(cropped_map, xlim = c(xmin, xmax), ylim = c(ymin, ymax), axes = T)
-  mask.raster <- raster(extent(shape_file), resolution = resolut,
+  mask.raster <- raster(extent(as(shape_file, 'Spatial')), resolution = resolut,
                         crs = CRS("+proj=longlat +datum=WGS84"))
-  r <- rasterize(shape_file, mask.raster, fun = 'first')
+  r <- rasterize(as(shape_file, 'Spatial'), mask.raster, fun = 'first')
   proj4string(r) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
   r <- merge(r, mask.raster)
   ncellR <- ncell(r)
