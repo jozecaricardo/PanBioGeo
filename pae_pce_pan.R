@@ -176,7 +176,7 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
     
     # RI of each character (i.e., taxon):
     riVec <- RI(strictTree, data = tempMatrix, sitewise = TRUE)
-    # riVec[which(is.na(riVec))] <- 0
+    riVec[which(is.na(riVec))] <- 0
     
     if(all(is.na(riVec) == TRUE)){
       print('This analysis had to be stopped because there is no more synapomorphies!')
