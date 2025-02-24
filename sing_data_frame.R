@@ -17,7 +17,9 @@ singleton.to.data.frame <- function(data = NULL, phylogeny = NULL){
 	}
 
 	if(all(singletons > 1) == T){
-		return(list(data_df = data, treeMod = phylogeny))
+	  spp <- data[, 1]
+	  data_df <- data.frame(spp = spp, long = long, lat = lat)
+		return(list(data_df = data_df, treeMod = phylogeny))
 		stop('The dataset is OK. No modifications were needed!/n
 			Please check the names of columns: they must to be long and lat!')
 	}

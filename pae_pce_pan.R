@@ -90,7 +90,7 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
     iterat <- 0
   }
   
-  # set the cells associated with the shapfile to the specified value
+  # set the cells associated with the shapefile to the specified value
   r[r == 1] <- NA
   
   
@@ -619,6 +619,9 @@ pae_pce <- function(preabsMat, shapeFile, resolut, N = NULL,
     conta[contagem] <- contagem
   } # close while looping
   
+  if (exists("matTemp") == FALSE && length(conta) == 1){
+    stop('This analysis has no indicative of generalized tracks!')
+  }
   
   if(length(colnames(matTemp)) == 0 && length(conta) == 1){
     xis <- 1
