@@ -24,19 +24,20 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   library(viridis); library(mapdata); library(vegan); library(spdep)
   library(dismo); library(spatstat); library(terra)
   
-  if(length(taxon) < 2){
-    warning('It is not possible with only one species to produce generalized tracks by the PAE-PCE analysis!')
+  if(is.null(taxon) == FALSE){
+    if(length(taxon) < 2){
+      warning('It is not possible with only one species to produce generalized tracks by the PAE-PCE analysis!')
+    }
   }
   
   if(sobrepo == FALSE){
-    # layout(1, 1, 1)
+    par(mfrow = c(1, 1))
     plot(shape_file, type = 'n', xlim = c(xmin, xmax), ylim = c(ymin, ymax))
-    # dev.off()
   }
-
+  
   print('2) preparing the coordinates...')
   coordin <- matrix(as.matrix(coordin[, c(2, 3)]), nrow(coordin),
-             2, dimnames = list(coordin[,1], colnames(coordin)[c(2, 3)]))
+                    2, dimnames = list(coordin[,1], colnames(coordin)[c(2, 3)]))
   
   cols1 <- setNames(viridis(n = length(unique(rownames(coordin)))),
                     unique(rownames(coordin)))
@@ -44,13 +45,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   if(seephylog == TRUE && sobrepo == TRUE){
     stop('This is not possible! Please try to use the each argument separately.')
   }
-
-
-  #- R graphs:
-  # par(pty = 's')
-  # if(seephylog == TRUE){
-  #   layout(1:2, 1, 2)
-  # }
+  
+  
   if(seeres == TRUE){
     layout(matrix(1, nr = 1, nc = 1, byrow = F))
   }
@@ -88,11 +84,11 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   
   if(seephylog == TRUE){
     obj2 <- phylo.to.map(tree = tree, coords = coordin[,2:1],
-     database = as(shape_file, 'Spatial'), plot = F, rotate = F)
+                         database = as(shape_file, 'Spatial'), plot = F, rotate = F)
     plot(obj2, colors = cols1, ftype = 'i', fsize = 0.6, cex.points = c(0.7, 1.2), pts = F,
          direction = "rightwards")
     labelnodes(1:(Ntip(tree) + tree$Nnode), 1:(Ntip(tree) + tree$Nnode),
-     interactive = F, cex = .6, circle.exp = 0.4)
+               interactive = F, cex = .6, circle.exp = 0.4)
     mtext('Phylogeny on the map', side = 3, line = -5)
   }
   
@@ -111,7 +107,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
     tabelao <- mrca(phy = tree, full = F)
   }
   
-
+  
   grid <- raster(extent(as(shape_file, 'Spatial')), resolution = resol,
                  crs = CRS("+proj=longlat +datum=WGS84"))
   grid <- raster::extend(grid, c(1, 1))
@@ -160,46 +156,46 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
   if(sobrepo == FALSE){
     if(seephylog == TRUE){
       if(is.null(nodes)){
-        plot(shape_file, axes = TRUE, sub = paste0(c('resolution: ', resol[1],
-                    ' x ', resol[2]), collapse = ''), xlim = c(xmin, xmax), ylim = c(ymin, ymax))
-        abline(h = 0, col = 'red', lty = 2) # equator
+        plot(shape_file, axes = TRUE, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+        mtext(paste0('resolution: ', resol[1], ' x ', resol[2]), side = 1, line = 3, cex = 0.7)
+        # abline(h = 0, col = 'red', lty = 2) # equator
         mtext('Minimum spanning trees of the terminal nodes', side = 3, line = 2)
       } else if(!is.null(nodes)){
         if(length(nodes) == 1){
-          plot(shape_file, axes = TRUE, sub = paste0(c('resolution: ', resol[1], ' x ', resol[2]),
-                  collapse = ''), cex.main = 0.7, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
-          abline(h = 0, col = 'red', lty = 2) # equator
+          plot(shape_file, axes = TRUE, cex.main = 0.7, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+          mtext(paste0('resolution: ', resol[1], ' x ', resol[2]), side = 1, line = 3, cex = 0.7)
+          # abline(h = 0, col = 'red', lty = 2) # equator
           mtext(paste0(c('Mapping a minimum spanning tree of the internal node:',
-                       nodes), collapse = ' '), side = 3, line = 2)
+                         nodes), collapse = ' '), side = 3, line = 2)
         } else if(length(nodes) > 1){
-          plot(shape_file, axes = TRUE, sub = paste0(c('resolution: ',
-                resol[1], ' x ', resol[2]), collapse = ''), cex.main = 0.7,
+          plot(shape_file, axes = TRUE, cex.main = 0.7,
                xlim = c(xmin, xmax), ylim = c(ymin, ymax))
-          abline(h = 0, col = 'red', lty = 2) # equator
+          mtext(paste0('resolution: ', resol[1], ' x ', resol[2]), side = 1, line = 3, cex = 0.7)
+          # abline(h = 0, col = 'red', lty = 2) # equator
           mtext(paste0(c('Mapping a minimum spanning tree of the internal nodes:',
-                              nodes), collapse = ' '), side = 3, line = 2)
+                         nodes), collapse = ' '), side = 3, line = 2)
         }
       }
     } else {
       if(is.null(nodes) && !is.null(taxon)){
         plot(shape_file, axes = TRUE, main = 'Minimum spanning tree(s) of the terminal node(s)',
-             sub = paste0(c('resolution: ', resol[1], ' x ', resol[2]), collapse = ''), cex.main = 0.9,
-             cex.sub = 0.7, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
-        abline(h = 0, col = 'red', lty = 2) # equator
+             cex.main = 0.9, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+        mtext(paste0('resolution: ', resol[1], ' x ', resol[2]), side = 1, line = 3, cex = 0.7)
+        # abline(h = 0, col = 'red', lty = 2) # equator
       } else if(!is.null(nodes) || !is.null(taxon)){
         plot(shape_file, axes = TRUE, main = paste0(c('Mapping a minimum spanning tree of the node(s):',
-            nodes), collapse = ' '), sub = paste0(c('resolution: ', resol[1], ' x ', resol[2]), collapse = ''),
-            cex.main = 0.9, cex.sub = 0.7, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
-        abline(h = 0, col = 'red', lty = 2) # equator
+                                                      nodes), collapse = ' '), cex.main = 0.9, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+        mtext(paste0('resolution: ', resol[1], ' x ', resol[2]), side = 1, line = 3, cex = 0.7)
+        # abline(h = 0, col = 'red', lty = 2) # equator
       } else if(is.null(nodes) && is.null(taxon)){
         plot(shape_file, axes = TRUE, main = 'Mapping a minimum spanning tree of the terminal nodes!',
-          sub = paste0(c('resolution: ', resol[1], ' x ', resol[2]), collapse = ''),
-          cex.main = 0.9, cex.sub = 0.7, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
-        abline(h = 0, col = 'red', lty = 2) # equator
+             cex.main = 0.9, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+        mtext(paste0('resolution: ', resol[1], ' x ', resol[2]), side = 1, line = 3, cex = 0.7)
+        # abline(h = 0, col = 'red', lty = 2) # equator
       }
     }
   }
-
+  
   
   # preparing species' msts...
   #######
@@ -221,7 +217,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
     if(!is.null(taxon)){
       
       if(mintreeall == TRUE){
-
+        
         for(j in taxon){
           # sppp <- which(unique(rownames(coords)) == taxon[j])
           
@@ -239,7 +235,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         names(Long) <- frame[,1]
         
         tempo <- matrix(cbind(as.numeric(Long), as.numeric(Lat)), nrow(frame), 2, dimnames = list(frame[,1],
-                     colnames(frame)[c(2,3)]))
+                                                                                                  colnames(frame)[c(2,3)]))
         
         #### shapefile ###
         tempo.d <- as.data.frame(tempo)
@@ -249,7 +245,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # resul1_shape <- rgdal::readOGR(dsn = 'out/pointsshape_mintreeall.shp', verbose = FALSE)
         # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
         resul1_shape <- vect('out/pointsshape_mintreeall.shp',
-         crs = "+proj=longlat +datum=WGS84")
+                             crs = "+proj=longlat +datum=WGS84")
         # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         terra::project(resul1_shape, "+proj=longlat +datum=WGS84")
         
@@ -262,7 +258,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
         lats <- cbind(resul1_shape$long,
-              resul1_shape$lat)
+                      resul1_shape$lat)
         rownames(lats) <- rownames(tempo.d)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -298,26 +294,26 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           x <- taxon
           if(sobrepo == TRUE){
             legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x, pch = 19, col = cols1[x], bty = 'n',
-                 pt.cex = 0.6, cex = 0.6, title = 'Adding species...', title.col = 'red')
+                   pt.cex = 0.6, cex = 0.6, title = 'Adding species...', title.col = 'red')
           } else {
             legend(x = "bottomleft", legend = x, pch = 19, col = cols1[x], title = 'Members of the minimum spanning tree',
-             title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                   title.col = 'red', pt.cex = 0.6, cex = 0.6)
           }
         }
-
+        
         # back-transforming lines in points:
         suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
         
         # presence-absence matrix:
         ncellras <- ncell(r)
         coor.l <- matrix(NA, nr = ncellras, nc = length(taxon), dimnames = list(seq(1:ncellras),
-                      unique(rownames(tempo))[c(1:length(taxon))]))  # tabela com todas as células
+                                                                                unique(rownames(tempo))[c(1:length(taxon))]))  # tabela com todas as células
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
         proj4string(linhasRaster) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
-
+        
         writeRaster(linhasRaster, "out/presence_mintreeall.tif",
                     overwrite = TRUE)
-    
+        
         plot(linhasRaster, axes = FALSE, legend = FALSE, add = TRUE, col = cols1[1],
              alpha = transp)
         
@@ -334,15 +330,15 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         coor.ll <- rbind(coor.l, rep(0, ncol(coor.l)))
         rownames(coor.ll) <- c(rownames(coor.l), 'ROOT')
         write.table(x = coor.ll, file = 'out/pres_abs.txt', sep = '\t')
-
+        
         return(coor.ll)
         
         
       } else if (mintreeall == FALSE){
-
+        
         conta <- 0
         coor.l <- matrix(NA, nr = ncellras, nc = length(taxon), dimnames = list(seq(1:ncellras),
-                              taxon)[c(1:2)])  # tabela com todas as células
+                                                                                taxon)[c(1:2)])  # tabela com todas as células
         lista_r <- list()
         
         for(j in taxon){
@@ -355,7 +351,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           # dir.create('out/')
           write.shapefile(tempo_shape, paste0(c('out/pointshape_', j), collapse = ''))
           resul1_shape <- vect(paste0(c('out/pointshape_', j, '.shp'),
-                collapse = ''), crs = "+proj=longlat +datum=WGS84")
+                                      collapse = ''), crs = "+proj=longlat +datum=WGS84")
           # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
           # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           
@@ -367,7 +363,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
           lats <- cbind(resul1_shape$long,
-              resul1_shape$lat)
+                        resul1_shape$lat)
           rownames(lats) <- rownames(tempo.d)
           colnames(lats) <- c('longitude', 'latitude')
           mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -410,7 +406,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças   
           proj4string(lista_r[[conta]]) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
-            collapse = ''), overwrite = TRUE)
+                                               collapse = ''), overwrite = TRUE)
           plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE,
                col = cols1[j], alpha = transp)
           # colocando labels:
@@ -432,10 +428,16 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           x <- taxon
           if(sobrepo == TRUE){
             legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x, pch = 19, col = cols1[x],
-                 pt.cex = 0.6, cex = 0.6, title = 'Adding species...', title.col = 'red')
+                   pt.cex = 0.6, cex = 0.6, title = 'Adding species...', title.col = 'red')
           } else {
-              legend(x = "bottomleft", legend = x, pch = 19, col = cols1[x], title = 'Members of the minimum spanning tree(s)',
-                title.col = 'red', pt.cex = 0.6, cex = 0.6)
+            # Criar vetor com números dos traços para cada táxon
+            track_numbers <- sapply(taxon, function(j) tabelao[j,j])
+            # Criar legendas com nome da espécie e número do traço entre parênteses
+            legend_labels <- paste0(taxon, " (", track_numbers, ")")
+            
+            legend(x = "bottomleft", legend = legend_labels, pch = 19, col = cols1[taxon], 
+                   title = 'Members of the minimum spanning tree(s)',
+                   title.col = 'red', pt.cex = 0.6, cex = 0.6)
           }
         }
         
@@ -443,12 +445,12 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         coor.ll <- rbind(coor.l, rep(0, ncol(coor.l)))
         rownames(coor.ll) <- c(rownames(coor.l), 'ROOT')
         write.table(x = coor.ll, file = 'out/pres_abs.txt', sep = '\t')
-
+        
         return(coor.ll)
         
       }
     } else if(is.null(taxon)){ # null taxa
-
+      
       tempo <- coordin
       
       # tempo <- as.data.frame(na.exclude(tempo))
@@ -459,9 +461,9 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
       names(Long) <- rownames(tempo)
       
       tempo <- matrix(cbind(as.numeric(Long), as.numeric(Lat)), nrow(tempo), 2, dimnames = list(rownames(tempo),
-                                  colnames(tempo)[c(1,2)]))
+                                                                                                colnames(tempo)[c(1,2)]))
       
-
+      
       if(mintreeall == TRUE){
         
         #### shapefile ###
@@ -469,7 +471,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         tempo_shape <- lats2Shape(lats = tempo.d)
         write.shapefile(tempo_shape, 'out/pointsshape_mintreeall')
         resul1_shape <- vect('out/pointsshape_mintreeall.shp',
-         crs = "+proj=longlat +datum=WGS84")
+                             crs = "+proj=longlat +datum=WGS84")
         # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
         terra::project(resul1_shape, "+proj=longlat +datum=WGS84") # datum WGS84
         
@@ -481,7 +483,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
         lats <- cbind(resul1_shape$long,
-              resul1_shape$lat)
+                      resul1_shape$lat)
         rownames(lats) <- rownames(tempo.d)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -522,7 +524,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # presence-absence matrix:
         # ncellras <- ncell(r)
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo))), dimnames = list(seq(1:ncellras),
-                      unique(rownames(tempo)))[c(1:2)])
+                                                                                                  unique(rownames(tempo)))[c(1:2)])
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
         proj4string(linhasRaster) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84 
         writeRaster(linhasRaster, "out/presence_mintreeall.tif",
@@ -542,18 +544,18 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         coor.ll <- rbind(coor.l, rep(0, ncol(coor.l)))
         rownames(coor.ll) <- c(rownames(coor.l), 'ROOT')
         write.table(x = coor.ll, file = 'out/pres_abs.txt', sep = '\t')
-
+        
         return(coor.ll)
         
-
+        
       } else if (mintreeall == FALSE){
-
+        
         conta <- 0
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo))),
                          dimnames = list(seq(1:ncellras), unique(rownames(tempo)))
-                                         [c(1:2)])
+                         [c(1:2)])
         lista_r <- list()
-        
+        track_numbers <- setNames(rep(NA, length(unique(rownames(tempo)))), unique(rownames(tempo)))
         for(j in unique(rownames(tempo))){
           conta <- conta + 1
           tempoo <- subset(tempo[, 1:2], rownames(tempo) == j)
@@ -563,7 +565,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           tempo_shape <- lats2Shape(lats = tempo.d)
           write.shapefile(tempo_shape, paste0(c('out/pointshape_', j), collapse = ''))
           resul1_shape <- vect(paste0(c('out/pointshape_', j, '.shp'),
-                      collapse = ''), crs = "+proj=longlat +datum=WGS84")
+                                      collapse = ''), crs = "+proj=longlat +datum=WGS84")
           # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
           # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           terra::project(resul1_shape, "+proj=longlat +datum=WGS84")
@@ -577,7 +579,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           rownames(mst2) <- rownames(tempo.d)
           colnames(mst2) <- rownames(tempo.d)
           lats <- cbind(resul1_shape$long,
-              resul1_shape$lat)
+                        resul1_shape$lat)
           rownames(lats) <- rownames(tempo.d)
           colnames(lats) <- c('longitude', 'latitude')
           mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -618,10 +620,11 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE, col = cols1[j],
                alpha = transp)
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
-            collapse = ''), overwrite = TRUE)
-  
+                                               collapse = ''), overwrite = TRUE)
+          
           # teste <- tabelao[j,j] # posições dos táxons do nó
           teste <- conta
+          track_numbers[j] <- teste  # onde 'teste' é o número do traço calculado
           text(tempoo, labels = rep(teste, dim(tempo)[1]), cex = 0.5, pos = 2, col = cols1[j])
           
           # presence-absence matrix:
@@ -638,18 +641,20 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # legend
         if(caption == TRUE){
           x <- unique(rownames(tempo))
-          legend(x = "bottomleft", legend = x, pch = 19, col = cols1[unique(rownames(tempo))
-              [1:length(unique(rownames(tempo)))]], bty = 'o', pt.cex = 0.6, cex = 0.6)
+          # Criar legendas com números dos traços
+          legend_labels <- paste0(x, " (", track_numbers[x], ")")
+          legend(x = "bottomleft", legend = legend_labels, pch = 19, col = cols1[x],
+                 bty = 'o', pt.cex = 0.6, cex = 0.6)
         }
         
         coor.l <- na.exclude(coor.l)
         coor.ll <- rbind(coor.l, rep(0, ncol(coor.l)))
         rownames(coor.ll) <- c(rownames(coor.l), 'ROOT')
         write.table(x = coor.ll, file = 'out/pres_abs.txt', sep = '\t')
-
+        
         return(coor.ll)
         
-
+        
       }
     }
     ########### Choosing a node or nodes... ############
@@ -657,13 +662,13 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
     
     anc <- nodes
     no_num <- 0
-
+    
     ## looping the nodes:
     for(k in anc){
       no_num <- no_num + 1
-
+      
       lis <- arv$tip.label[arv$edge[which(arv$edge[,1] == k), 2]]
-        
+      
       # criando a condição de checagem dos táxons terminais:
       if (any(is.na(lis)) == FALSE){
         for(j in lis){
@@ -676,9 +681,9 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           tabela[(qde[idx - 1] + 1) : qde[idx], 1] <- rep(j, (qde[idx] - qde[idx - 1]))
           tabela[(qde[idx - 1] + 1) : qde[idx], 4] <- rep(no_num, (qde[idx] - qde[idx - 1]))
         }
-
+        
       } else if(any(is.na(lis)) == TRUE){
-
+        
         # tabelao <- mrca(phy = tree, full = F)
         teste <- which(tabelao %in% anc[no_num]) # posições dos táxons do nó
         tabelao.v <- as.vector(tabelao)
@@ -697,7 +702,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         }
       }
     }
-
+    
     # creating a table just for those terminal species  
     if(!is.null(taxon)){
       # preparing species' msts...
@@ -709,7 +714,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
       tab_sp <- matrix(NA, nrow = dim(coordin), nc = 4)
       no_num <- 0
       #######
-
+      
       for(z in taxon){
         no_num <- no_num + 1
         # sppp <- which(unique(rownames(coordin)) == taxon[j])
@@ -725,7 +730,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
     } else if(is.null(taxon)){
       tabela <- tabela
     }
-
+    
     if(mintreeall == TRUE){
       
       # internal nodes:
@@ -738,11 +743,11 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
       names(Long_n) <- frame.n[,1]
       
       tempo.temp2 <- matrix(cbind(as.numeric(Long_n), as.numeric(Lat_n)), nrow(frame.n), 2,
-                           dimnames = list(frame.n[,1], colnames(frame.n)[c(2,3)]))
+                            dimnames = list(frame.n[,1], colnames(frame.n)[c(2,3)]))
       #######
       
       if(!is.null(taxon)){
-
+        
         # terminal nodes:
         print('adding terminal nodes...')
         frame <- as.data.frame(na.exclude(tab_sp))
@@ -753,19 +758,19 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         names(Long) <- frame[,1]
         
         tempo.temp <- matrix(cbind(as.numeric(Long), as.numeric(Lat)), nrow(frame), 2,
-                        dimnames = list(frame[,1], colnames(frame)[c(2,3)]))
+                             dimnames = list(frame[,1], colnames(frame)[c(2,3)]))
         #######
         
         # putting in there alltogether:
         total <- rbind(frame.n, frame)
-      
+        
         Long <- total[,2]
         Lat <- total[, 3]
         names(Long) <- total[,1]
         
         tempo <- matrix(cbind(as.numeric(Long), as.numeric(Lat)), nrow(total), 2,
                         dimnames = list(total[,1], colnames(total)[c(2,3)]))
-      
+        
         #### shapefiles ###
         ## terminal + nodes
         tempo.d <- as.data.frame(tempo)
@@ -773,7 +778,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # dir.create('temp/')
         write.shapefile(tempo_shape, 'out/ancterminal_points_mintreeall')
         resul1_shape <- vect('out/ancterminal_points_mintreeall.shp',
-         crs = "+proj=longlat +datum=WGS84")
+                             crs = "+proj=longlat +datum=WGS84")
         # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         terra::project(resul1_shape, "+proj=longlat +datum=WGS84")
         
@@ -782,7 +787,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         tempo_shape.temp <- lats2Shape(lats = tempo_temp.d)
         write.shapefile(tempo_shape.temp, 'out/points_mintreeall_onlyterminal')
         resul1_shape.temp <- vect('out/points_mintreeall_onlyterminal.shp',
-          crs = "+proj=longlat +datum=WGS84")
+                                  crs = "+proj=longlat +datum=WGS84")
         terra::project(resul1_shape.temp, "+proj=longlat +datum=WGS84")
         # proj4string(resul1_shape.temp) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         # projection(resul1_shape.temp) <- CRS("+proj=longlat +datum=WGS84")
@@ -793,7 +798,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
       tempo_shape.temp <- lats2Shape(lats = tempo_temp.d2)
       write.shapefile(tempo_shape.temp, 'out/points_mintreeall_onlyinternal')
       resul2_shape.temp <- vect('out/points_mintreeall_onlyinternal.shp',
-       crs = "+proj=longlat +datum=WGS84")
+                                crs = "+proj=longlat +datum=WGS84")
       terra::project(resul2_shape.temp, "+proj=longlat +datum=WGS84")
       # proj4string(resul2_shape.temp) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
       # projection(resul2_shape.temp) <- CRS("+proj=longlat +datum=WGS84")
@@ -807,7 +812,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         rownames(mst2) <- rownames(tempo.d)
         colnames(mst2) <- rownames(tempo.d)
         lats <- cbind(resul1_shape$long,
-              resul1_shape$lat)
+                      resul1_shape$lat)
         rownames(lats) <- rownames(tempo.d)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -857,15 +862,15 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           if(length(anc) == 1){
             if(sobrepo == TRUE){
               legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
-                 pch = 'o', col = cols1[lis], title = paste0(c('Adding descendents from node ',
-                   nodes, '...'), collapse = ''), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                     pch = 'o', col = cols1[lis], title = paste0(c('Adding descendents from node ',
+                                                                   nodes, '...'), collapse = ''), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = extent(as(shape_file, 'Spatial'))[1], y = extent(as(shape_file, 'Spatial'))[4], legend = xx,
                      pch = 'o', col = cols1[xx], title = 'Adding terminal(s)...', 
                      title.col = 'blue', pt.cex = 0.6, cex = 0.6)
             } else if(sobrepo == FALSE){
               legend(x = "bottomleft", legend = x,
-                 pch = 'o', col = cols1[lis], title = paste0(c('Descendents from node ', nodes),
-                        collapse = ''), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                     pch = 'o', col = cols1[lis], title = paste0(c('Descendents from node ', nodes),
+                                                                 collapse = ''), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = extent(as(shape_file, 'Spatial'))[1], y = extent(as(shape_file, 'Spatial'))[4], legend = xx,
                      pch = 'o', col = cols1[xx], title = 'Adding terminal(s)...', 
                      title.col = 'blue', pt.cex = 0.6, cex = 0.6)
@@ -874,31 +879,31 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
             if(sobrepo == TRUE){
               legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                      pch = 'o', col = cols1[lis], title = paste0(c('Adding descendents from nodes',
-                nodes, '...'), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                                                                   nodes, '...'), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = extent(as(shape_file, 'Spatial'))[1], y = extent(as(shape_file, 'Spatial'))[4], legend = xx,
                      pch = 'o', col = cols1[xx], title = 'Adding terminal(s)...', 
                      title.col = 'blue', pt.cex = 0.6, cex = 0.6)
             } else if(sobrepo == FALSE){
               legend(x = "bottomleft", legend = x,
-                    pch = 'o', col = cols1[lis], title = paste0(c('Descendents from nodes', nodes),
-                    collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                     pch = 'o', col = cols1[lis], title = paste0(c('Descendents from nodes', nodes),
+                                                                 collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = extent(as(shape_file, 'Spatial'))[1], y = extent(as(shape_file, 'Spatial'))[4], legend = xx,
                      pch = 'o', col = cols1[xx], title = 'Adding terminal(s)...', 
                      title.col = 'blue', pt.cex = 0.6, cex = 0.6)
             }
           }
         }
-
+        
         # back-transforming lines in points:
         suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
         
         # presence-absence matrix:
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo))), dimnames = list(seq(1:ncellras),
-                  unique(rownames(tempo)))[c(1:2)])  # tabela com todas as células
+                                                                                                  unique(rownames(tempo)))[c(1:2)])  # tabela com todas as células
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
         proj4string(linhasRaster) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84    
         writeRaster(linhasRaster, "out/presence_mst_mintreeall_ancterminal.tif",
-         overwrite = TRUE)
+                    overwrite = TRUE)
         # plot(linhasRaster, axes = FALSE, legend = FALSE, add = TRUE, col = cols1[1],
         #     alpha = transp)
         
@@ -919,7 +924,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         rownames(mst2) <- rownames(tempo_temp.d2)
         colnames(mst2) <- rownames(tempo_temp.d2)
         lats <- cbind(resul2_shape.temp$long,
-                resul2_shape.temp$lat)
+                      resul2_shape.temp$lat)
         rownames(lats) <- rownames(tempo_temp.d2)
         colnames(lats) <- c('longitude', 'latitude')
         mst_shape <- msn2Shape(msn = mst2, lats = lats)
@@ -942,7 +947,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # colocando labels:
         text(resul2_shape.temp, labels = rep(nodes, dim(tempo_temp.d2)[1]), cex = 0.8, pos = 1,
              col = cols1[lis])
-                
+        
         
         # minimum convex polygon
         if(pol == TRUE){
@@ -953,48 +958,48 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           conv <- vect(conv, crs = '+proj=longlat +datum=WGS84')
           writeVector(conv, 'out/mcp_mintreeall_ancterminal', overwrite = T)
         }
-
-
+        
+        
         # legend
         if(caption == TRUE){
           x <- unique(rownames(tempo.temp2))
           if(length(anc) == 1){
             if(sobrepo == TRUE){
               legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
-                 pch = 'o', title = paste0(c('Adding descendents from node',
-                   nodes, '...'), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
-
+                     pch = 'o', title = paste0(c('Adding descendents from node',
+                                                 nodes, '...'), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+              
             } else if(sobrepo == FALSE){
               legend(x = "bottomleft", legend = x,
-                pch = 'o', title = paste0(c('Descendents from node', nodes),
-                collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
-      
+                     pch = 'o', title = paste0(c('Descendents from node', nodes),
+                                               collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+              
             }
           } else if(length(anc) > 1){
             if(sobrepo == TRUE){
               legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
-                    pch = 'o', title = paste0(c('Adding descendents from nodes',
-                    nodes, '...'), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
-
+                     pch = 'o', title = paste0(c('Adding descendents from nodes',
+                                                 nodes, '...'), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+              
             } else if(sobrepo == FALSE){
               legend(x = "bottomleft", legend = x,
-                  pch = 'o', title = paste0(c('Descendents from nodes', nodes),
-                  collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
-      
+                     pch = 'o', title = paste0(c('Descendents from nodes', nodes),
+                                               collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+              
             }
           }
         }
-
+        
         # back-transforming lines in points:
         suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
         
         # presence-absence matrix:
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo.temp2))), dimnames = list(seq(1:ncellras),
-                  unique(rownames(tempo.temp2)))[c(1:2)])  # tabela com todas as células
+                                                                                                        unique(rownames(tempo.temp2)))[c(1:2)])  # tabela com todas as células
         linhasRaster <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
         proj4string(linhasRaster) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         writeRaster(linhasRaster, "out/presence_mst_mintreeall_ancterminal.tif",
-         overwrite = TRUE)
+                    overwrite = TRUE)
         # plot(linhasRaster, axes = FALSE, legend = FALSE, add = TRUE, col = cols1[1],
         #     alpha = transp)
         
@@ -1007,15 +1012,15 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           }
         }
       }
-
+      
       coor.l <- na.exclude(coor.l)
       coor.ll <- rbind(coor.l, rep(0, ncol(coor.l)))
       rownames(coor.ll) <- c(rownames(coor.l), 'ROOT')
       write.table(x = coor.ll, file = 'out/pres_abs.txt', sep = '\t')
-
+      
       return(coor.ll)
       
-
+      
     } else if(mintreeall == FALSE){
       # internal nodes:
       print('adding internal nodes...')
@@ -1028,7 +1033,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
       nodd <- frame.n[, 4]
       names(Long_n) <- frame.n[,1]
       #######
-
+      
       # terminal nodes:
       if(!is.null(taxon)){
         print('adding terminal nodes...')
@@ -1039,27 +1044,27 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         Lat <- frame[, 3]
         names(Long) <- frame[,1]
       }
-        #######
-
+      #######
+      
       # internal nodes:
       tempo.n <- matrix(cbind(as.numeric(Long_n), as.numeric(Lat_n), as.numeric(nodd)), nrow(frame.n), 3,
-                   dimnames = list(frame.n[,1], colnames(frame.n)[c(2:4)]))
-
+                        dimnames = list(frame.n[,1], colnames(frame.n)[c(2:4)]))
+      
       if(!is.null(taxon)){
         #terminal nodes:
         tempo <- matrix(cbind(as.numeric(Long), as.numeric(Lat)), nrow(frame), 2,
                         dimnames = list(frame[,1], colnames(frame)[c(2,3)]))
       }
-
+      
       if(!is.null(taxon)){
         #let's put in there alltogether!
         coor.l <- matrix(NA, nr = ncellras, nc = sum(length(unique(rownames(tempo.n))), length(unique(rownames(tempo)))),
-         dimnames = list(seq(1:ncellras), c(unique(rownames(tempo.n)), unique(rownames(tempo))))[c(1:2)])  # tabela com todas as células
+                         dimnames = list(seq(1:ncellras), c(unique(rownames(tempo.n)), unique(rownames(tempo))))[c(1:2)])  # tabela com todas as células
       } else {
         #let's put in there alltogether!
         coor.l <- matrix(NA, nr = ncellras, nc = length(unique(rownames(tempo.n))),
-         dimnames = list(seq(1:ncellras), unique(rownames(tempo.n)))[c(1:2)])  # tabela com todas as células
-
+                         dimnames = list(seq(1:ncellras), unique(rownames(tempo.n)))[c(1:2)])  # tabela com todas as células
+        
       }
       
       # first, to internal nodes...
@@ -1076,8 +1081,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         # dir.create('out/')
         write.shapefile(tempo_shape, paste0(c('out/pointshape_', j), collapse = ''))
         resul1_shape <- vect(paste0(c('out/pointshape_', j, '.shp'),
-                              collapse = ''),
-                    crs = "+proj=longlat +datum=WGS84")
+                                    collapse = ''),
+                             crs = "+proj=longlat +datum=WGS84")
         # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
         # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         terra::project(resul1_shape, "+proj=longlat +datum=WGS84")
@@ -1113,7 +1118,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
         
         # labels:
         text(resul1_shape, labels = rep(nodes[unique(tempo.n[which(rownames(tempo.n) == j), 3])],
-                          dim(tempoo)[1]), cex = 0.6, pos = 1, col = 'black')
+                                        dim(tempoo)[1]), cex = 0.6, pos = 1, col = 'black')
         
         # minimum convex polygon
         if(pol == TRUE){
@@ -1124,18 +1129,18 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           plot(conv, add = T, col = adjustcolor(cols1[j], transp))
           writeVector(conv, paste0(c('out/mcp_', j), collapse = ''), overwrite = T)
         }              
-              
+        
         # back-transforming lines in points:
         suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
-                
+        
         lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
         proj4string(lista_r[[conta]]) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
         writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
-            collapse = ''), overwrite = TRUE)
-
+                                             collapse = ''), overwrite = TRUE)
+        
         plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE,
              col = cols1[unique(tempo.n[which(rownames(tempo.n) == j), 3])], alpha = transp)
-              
+        
         # presence-absence matrix:
         # preparing the matrix
         for(i in 1:ncellras){
@@ -1146,8 +1151,8 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           }
         }
       }
-  
-
+      
+      
       if(!is.null(taxon)){
         #finally, the terminal nodes:   
         contas <- 0
@@ -1162,7 +1167,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           # dir.create('temp/')
           write.shapefile(tempo_shape, paste0(c('out/pointshape_', j), collapse = ''))
           resul1_shape <- vect(paste0(c('out/pointshape_', j, '.shp'),
-                            collapse = ''), crs = "+proj=longlat +datum=WGS84")
+                                      collapse = ''), crs = "+proj=longlat +datum=WGS84")
           # resul1_shape <- readShapeSpatial('tempshape1_out.shp') # shapefile
           # proj4string(resul1_shape) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           terra::project(resul1_shape, "+proj=longlat +datum=WGS84")
@@ -1193,7 +1198,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           
           teste <- tabelao[j, j] # posições dos táxons do nó
           text(tempoo, labels = rep(teste, dim(tempoo)[1]), cex = 0.8, pos = 2, col = cols1[j])
-
+          
           # minimum convex polygon
           if(pol == TRUE){
             conv <- convexhull.xy(tempoo)
@@ -1203,18 +1208,18 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
             conv <- vect(conv, crs = "+proj=longlat +datum=WGS84")
             writeVector(conv, paste0(c('out/mcp_', j), collapse = ''), overwrite = T)
           }              
-                
+          
           # back-transforming lines in points:
           suppressWarnings(pontos_linha2 <- spsample(pontos_linha, n = 100, type = 'regular'))
-                  
+          
           lista_r[[conta]] <- rasterize(pontos_linha2, r, field = 1) # raster com as presenças
           proj4string(lista_r[[conta]]) <- CRS("+proj=longlat +datum=WGS84") # datum WGS84
           writeRaster(lista_r[[conta]], paste0(c("out/presence_mst_", j, ".tif"), 
-            collapse = ''), overwrite = TRUE)
+                                               collapse = ''), overwrite = TRUE)
           
           plot(lista_r[[conta]], axes = FALSE, legend = FALSE, add = TRUE, col = cols1[j],
                alpha = transp)
-                
+          
           # presence-absence matrix:
           # preparing the matrix
           for(i in 1:ncellras){
@@ -1226,7 +1231,7 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           }
         }
       }
-
+      
       if(!is.null(taxon)){
         # legend
         if(caption == TRUE){
@@ -1237,19 +1242,19 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
             if(sobrepo == TRUE){
               legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                      pch = 19, col = cols1[x], title = paste0(c('Adding descendents from the node',
-                   nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                                                                nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'bottomright', legend = xx,
                      pch = 19, col = cols1[xx], title = 'Adding terminal node(s)...', title.col = 'blue',
-                 pt.cex = 1.2, cex = 0.6)
+                     pt.cex = 1.2, cex = 0.6)
               legend(x = 'topright', legend = nodes, pch = 15, col = cols1[xxx], title = 'Adding the node(s)...', title.col = 'blue',
                      pt.cex = 1.2, cex = 0.6)
               
             } else if(sobrepo == FALSE){
               legend(x = "bottomleft", legend = x, pch = 19, col = cols1[x], title = paste0(c('Descendents from the node',
-               nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                                                                                              nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'bottomright', legend = xx,
-                 pch = 19, col = cols1[xx], title = 'Adding terminal node(s)...',
-                   title.col = 'blue', pt.cex = 1.2, cex = 0.6)
+                     pch = 19, col = cols1[xx], title = 'Adding terminal node(s)...',
+                     title.col = 'blue', pt.cex = 1.2, cex = 0.6)
               legend(x = 'topright', legend = nodes, pch = 15, col = cols1[xxx], title = 'Adding the node(s)...', title.col = 'blue',
                      pt.cex = 1.2, cex = 0.6)
               
@@ -1258,18 +1263,18 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
             if(sobrepo == TRUE){
               legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
                      pch = 19, col = cols1[x], title = paste0(c('Adding descendents from the nodes',
-                   nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                                                                nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'bottomright', legend = xx,
-                 pch = 19, col = cols1[xx], title = 'Adding terminal node(s)...',
-                 title.col = 'blue', pt.cex = 1.2, cex = 0.6, bty = 'n')
+                     pch = 19, col = cols1[xx], title = 'Adding terminal node(s)...',
+                     title.col = 'blue', pt.cex = 1.2, cex = 0.6, bty = 'n')
               legend(x = 'topright', legend = nodes, pch = 15, col = cols1[xxx], title = 'Adding the node(s)...', title.col = 'blue',
                      pt.cex = 1.2, cex = 0.6)
             } else if(sobrepo == FALSE){
               legend(x = "bottomleft", legend = x, pch = 19, col = cols1[x], title = paste0(c('Descendents from the nodes',
-               nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                                                                                              nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'bottomright', legend = xx,
-                 pch = 19, col = cols1[xx], title = 'Adding terminal node(s)...',
-                 title.col = 'blue', pt.cex = 1.2, cex = 0.6)
+                     pch = 19, col = cols1[xx], title = 'Adding terminal node(s)...',
+                     title.col = 'blue', pt.cex = 1.2, cex = 0.6)
               legend(x = 'topright', legend = nodes, pch = 15, col = cols1[xxx], title = 'Adding the node(s)...', title.col = 'blue',
                      pt.cex = 1.2, cex = 0.6)
             }
@@ -1283,43 +1288,43 @@ terminal_node <- function(coordin, tree = NULL, shape_file, resol, seeres = FALS
           if(length(anc) == 1){
             if(sobrepo == TRUE){
               legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
-                  pch = 19, col = cols1[x], title = paste0(c('Adding descendents from the node',
-                  nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                     pch = 19, col = cols1[x], title = paste0(c('Adding descendents from the node',
+                                                                nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'topright', legend = nodes, pch = 15, col = cols1[xxx], title = 'Adding the node(s)...', title.col = 'blue',
                      pt.cex = 1.2, cex = 0.6)
-      
+              
             } else if(sobrepo == FALSE){
               legend(x = "bottomleft", legend = x, pch = 19, col = cols1[x], title = paste0(c('Descendents from the node',
-               nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                                                                                              nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'topright', legend = nodes, pch = 15, col = cols1[xxx], title = 'Adding the node(s)...', title.col = 'blue',
                      pt.cex = 1.2, cex = 0.6)
-
+              
             }
           } else if(length(anc) > 1){
             if(sobrepo == TRUE){
               legend(x = extent(as(shape_file, 'Spatial'))[2] - 30, y = extent(as(shape_file, 'Spatial'))[4], legend = x,
-                 pch = 19, col = cols1[x], title = paste0(c('Adding descendents from the nodes',
-                   nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                     pch = 19, col = cols1[x], title = paste0(c('Adding descendents from the nodes',
+                                                                nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'topright', legend = nodes, pch = 15, col = cols1[xxx], title = 'Adding the node(s)...', title.col = 'blue',
                      pt.cex = 1.2, cex = 0.6)
-      
+              
             } else if(sobrepo == FALSE){
               legend(x = "bottomleft", legend = x, pch = 19, col = cols1[x], title = paste0(c('Descendents from the nodes',
-               nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
+                                                                                              nodes), collapse = ' '), title.col = 'red', pt.cex = 0.6, cex = 0.6)
               legend(x = 'topright', legend = nodes, pch = 15, col = cols1[xxx], title = 'Adding the node(s)...', title.col = 'blue',
                      pt.cex = 1.2, cex = 0.6)
-          
+              
             }
           }
         }
-
+        
       }       
-
+      
       coor.l <- na.exclude(coor.l)
       coor.ll <- rbind(coor.l, rep(0, ncol(coor.l)))
       rownames(coor.ll) <- c(rownames(coor.l), 'ROOT')
       write.table(x = coor.ll, file = 'out/pres_abs.txt', sep = '\t')
-
+      
       return(coor.ll)
       
     }
